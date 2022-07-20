@@ -1602,6 +1602,58 @@ app.post('/signin', async (req, res) => {
             });
             
           });
+
+          
+          app.post("/addLocation",async(req,res)=>{
+            
+            
+            console.log(req.body);
+            const e =req.body.email;
+            const d =req.body.Date;
+            const l=req.body.Longitude;
+            const la =req.body.latitude;
+
+         
+            const doc = new location({ Date:d,email:e,Latitude:la,longitude:l})
+           
+            doc.save((err, doc) => {
+              if (err) {
+                res.status(400).json({ user:false  });
+              } else {
+                res.status(200).json({ user: true ,});
+              }
+            });
+          });
+
+       
+          app.post("/UpdateLocation",async(req,res)=>{
+            console.log(req.body);
+            const id=req.body.id;
+            const lo=req.body.long;
+            const la=req.body.lat;
+           
+            
+            location.findOneAndUpdate(
+              {"_id":id}, 
+          
+              { 
+                  $set: {
+                    Latitude:la,longitude:lo}
+              },
+              {
+                  returnNewDocument: true
+              }
+            , function( error, result){
+             if(error)
+            {
+              res.status(400).send("error Updating");
+            }
+             else{
+              res.status(200).send("Successfully done");   }
+            });
+            
+          });
+          
 app.listen(3001,()=>{
     console.log("server runing 3001");
 
