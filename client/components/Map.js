@@ -220,7 +220,7 @@ return true;
   getData2()
 
   
-  let locationpreviw=<Text>No location picked yet</Text>
+  let locationpreviw=<Text style={{fontSize:20,fontWeight:'800',marginRight:80}}>No location picked yet</Text>
   if(latitude && show){
     locationpreviw=(
         <MapView style={{width:'100%',height:'100%'}} 

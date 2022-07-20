@@ -162,6 +162,7 @@ async function handleclock(){
 
     }
     if(inClock){
+      
         const outC=moment()
         
         const response = await fetch('http://10.0.2.2:3001/update_clock', {
