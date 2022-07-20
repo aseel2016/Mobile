@@ -1,0 +1,14 @@
+const  mongoose =require( 'mongoose');
+
+const RequestOff=new mongoose.Schema({
+emplyeeId:String,
+Type:String,
+Description:String,
+Starting:Date,
+Ending:Date,
+StatusHR:String,
+StatusManager:String,
+
+});
+const Request=mongoose.model("Requestoff",RequestOff);
+module.exports=Request;
