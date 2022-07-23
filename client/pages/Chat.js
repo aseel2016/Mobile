@@ -21,6 +21,8 @@ export default function Chat({navigation}){
   const [clocks,setClocks]=useState([])
 const [date,setDate]=useState();
   const [show,setShow]=useState(false);
+  const [search,setSearch]=useState("");
+
 
 
   employe=[];
@@ -82,7 +84,9 @@ employees.map((val)=>{
 if(val.email!==emai){
 
  employe.push({'id':val._id,'image':val.image,
- 'name':val.firstName+" "+val.lastName})
+ 'name':val.firstName+" "+val.lastName
+
+})
 
 }
 })
@@ -105,11 +109,21 @@ return (
       justifyContent:'center',
       alignContent:'center',fontSize:25,fontWeight:'bold',color:'grey'}}>Contacts</Text>
   </View>
+  <TextInput placeholder='search' 
+  onChangeText={(e)=>setSearch(e)}
+
+  style={{fontSize:20,padding:10,margin:10}}/>
   <ScrollView style={{width:'100%'}}>
+    
+    
   <View>
     {
       employe.map((val)=>{
-        return(<View  key={val.id}>
+        if(search!=""){
+        if((val.name).includes(search)){
+
+          return (
+            <View  key={val.id}>
          <TouchableOpacity 
          onPress={()=>navigation.navigate("Messenger",{id:val.id,idMe:idMe})}
          style={{flexDirection:'row',margin:20}}>
@@ -124,7 +138,31 @@ return (
     <Text style={{margin:10,fontSize:18,fontWeight:'bold'}}>{val.name}</Text>
     </TouchableOpacity>
          
-          </View>);
+          </View>
+          );
+        }}
+        else{
+          return (
+            <View  key={val.id}>
+         <TouchableOpacity 
+         onPress={()=>navigation.navigate("Messenger",{id:val.id,idMe:idMe})}
+         style={{flexDirection:'row',margin:20}}>
+           <Avatar
+    rounded
+    avatarStyle={{ borderWidth:2,
+      borderColor:"white"}}
+    size={50}
+    source={{uri:val.image}}
+
+    />
+    <Text style={{margin:10,fontSize:18,fontWeight:'bold'}}>{val.name}</Text>
+    </TouchableOpacity>
+         
+          </View>
+          );
+
+        }
+        
       })
     }
 

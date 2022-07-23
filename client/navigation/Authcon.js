@@ -10,6 +10,7 @@ import { colors } from '../global/styles';
  import EditProfile from '../pages/EditProfile';
 import RequestOFF from '../pages/TimeoffRequest';
 import Messenger from '../pages/Messenger'
+import Messages from '../pages/Messages';
 const Stack = createNativeStackNavigator();
 
 export default function NavigateScreens() {
@@ -49,6 +50,10 @@ export default function NavigateScreens() {
 
      
      />
+     
+     
+     <Stack.Screen  name="Messages" component={Messages} 
+       />
 
 
      
