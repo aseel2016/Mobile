@@ -1,7 +1,7 @@
 import React,{useState,useEffect,useRef} from 'react';
 import 'react-native-gesture-handler';
 
-import { StyleSheet, Text, View,Animated,Modal,Alert,TouchableOpacity,Dimensions,TextInput} from 'react-native';
+import { StyleSheet,ScrollView, Text, View,Animated,Modal,Alert,TouchableOpacity,Dimensions,TextInput} from 'react-native';
 import{colors} from "../global/styles"
 import HomeHeader from '../components/HomeHeader';
 import AsyncStorage from '@react-native-async-storage/async-storage';  
@@ -130,8 +130,13 @@ const datay =  await response.json()
   
 
 return ( 
+ 
     <View >
     <HomeHeader navigation={navigation}/>
+    <View>
+      
+      <View>
+    
     <TouchableOpacity style={styles.container}  >
                         <Text  style={styles.text}> Date  </Text>
 
@@ -139,6 +144,7 @@ return (
             <Text style={styles.text}>  Longitude </Text>
            
             </TouchableOpacity>
+            
     {
 
       Mylocations.map((val,key)=>{
@@ -158,37 +164,47 @@ return (
             </TouchableOpacity>);
       })
     }
+    </View>
    
-
-   { show && <ModalPoup visible={show}>
-        <View style={{alignItems: 'center'}}>
-          <View style={styles.header}>
-           <Icon4  name='close'size={25} onPress={()=>setShow(false)}/>
-          </View>
-        </View>
-      
+   
+{show &&  <View style={styles.mapPreview}>
+            
 
         
-      
-      <MapView style={{width:'100%',height:300}} 
+        <MapView style={{width:'100%',height:'100%'}} 
+        
+   
         >
              <Marker 
      
-     coordinate={{ latitude : latitude , longitude : longitude }}/>
+     coordinate={{ latitude : parseFloat(latitude) , longitude : parseFloat(longitude) }}>
+
+
+     </Marker>
+   
 
     
             </MapView>
+
+
+    
+
+  
+
+
+           </View>  }
+           
+  
+
+
+
+   
+           </View>
           
-
-
-
-
+           
           
-        
-      </ModalPoup>}
-
-
     </View>
+   
    );
 }
 

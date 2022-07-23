@@ -7,7 +7,8 @@ import DawNav from './DrawerNavigate'
 import Notifications from '../pages/notifications'
 import React from 'react';
 import { colors } from '../global/styles';
- import EditProfile from '../pages/EditProfile'
+ import EditProfile from '../pages/EditProfile';
+import RequestOFF from '../pages/TimeoffRequest';
 const Stack = createNativeStackNavigator();
 
 export default function NavigateScreens() {
@@ -28,7 +29,18 @@ export default function NavigateScreens() {
      options={{title:"Edit My profile"
   
      }}
+
+     
      />
+      <Stack.Screen  name="RequestOFF" component={RequestOFF} 
+     options={{title:"Send request off"
+  
+     }}
+
+     
+     />
+
+
      
 
 

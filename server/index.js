@@ -1653,6 +1653,32 @@ app.post('/signin', async (req, res) => {
             });
             
           });
+          app.post("/insert_request",async(req,res)=>{
+          
+            
+            console.log(req.body);
+            const t =req.body.type;
+            const i =req.body.id;
+            const d =req.body.description;
+            const e =req.body.end;
+            const s =req.body.start;
+            const doc = new RequestOff ({ 
+              emplyeeId:i,
+              Type:t,
+              Ending:e,
+              Starting:s,
+              Description:d,
+})
+           
+            doc.save((err, doc) => {
+              if (err) {
+                res.status(400).json({ user:false  });
+              } else {
+                console.log(doc._id)
+                res.status(200).json({ user: true ,id:doc._id});
+              }
+            });
+          });
           
 app.listen(3001,()=>{
     console.log("server runing 3001");

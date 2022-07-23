@@ -5,8 +5,11 @@ import { Button } from 'react-native-elements';
 import AsyncStorage from '@react-native-async-storage/async-storage';  
 import Axios from 'axios'
 import moment from 'moment'
+import Firebase from '../Firebase';
+import { onSnapshot, collection, doc, updateDoc,setDoc,getFirestore,deleteDoc} from "firebase/firestore";
+import db from "../Firebase";
 require('moment-precise-range-plugin');
-
+import { v4 as uuidv4 } from 'uuid';
 export default function Clock(){
 const [inClock,setClock]=useState();
 const[hours,setHours]=useState(0);
