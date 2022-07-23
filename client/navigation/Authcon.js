@@ -9,6 +9,7 @@ import React from 'react';
 import { colors } from '../global/styles';
  import EditProfile from '../pages/EditProfile';
 import RequestOFF from '../pages/TimeoffRequest';
+import Messenger from '../pages/Messenger'
 const Stack = createNativeStackNavigator();
 
 export default function NavigateScreens() {
@@ -36,6 +37,15 @@ export default function NavigateScreens() {
      options={{title:"Send request off"
   
      }}
+
+     
+     />
+     
+       <Stack.Screen  name="Messenger" component={Messenger} 
+       
+   
+  
+     
 
      
      />

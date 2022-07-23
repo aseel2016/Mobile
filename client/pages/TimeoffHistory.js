@@ -489,7 +489,8 @@ return (
                 fontSize:20,
                fontWeight:'bold',
                margin:10,
-           }}> </Text>
+              
+           }}>Waiting </Text>
 
             }
             return <View key={val.key}>
