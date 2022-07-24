@@ -4,12 +4,16 @@ import 'react-native-gesture-handler';
 import { StyleSheet, Text, View,Alert,Dimensions,TextInput} from 'react-native';
 import { GiftedChat } from 'react-native-gifted-chat'
 import HomeHeader from '../components/HomeHeader';
-
+import Firebase from '../Firebase';
+import { onSnapshot, collection, doc, updateDoc,setDoc,getFirestore,deleteDoc} from "firebase/firestore";
+import db from "../Firebase";
 import * as Animatable from 'react-native-animatable';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon2 from 'react-native-vector-icons/MaterialIcons';
 import {Button} from 'react-native-elements'
 import Axios from 'axios';
+import { v4 as uuidv4 } from 'uuid';
+import "react-native-get-random-values";
 let messages=[];
 
 let othername;
@@ -21,7 +25,8 @@ export default function Messenger({ route, navigation }){
 
     const [currentChat, setCurrentChat] = useState(null);
     const [employees,setEmployees]=useState([]);
-    
+    const [messagesFire,setMessagesFire]=useState([]);
+
     useEffect(()=>{
       Axios.get('http://10.0.2.2:3001/getAllActive').then((response)=>{
           setEmployees(response.data);
@@ -29,6 +34,14 @@ export default function Messenger({ route, navigation }){
         })
      
     },[]);
+
+    useEffect(
+      () =>
+            onSnapshot(collection(db, "messages"), (snapshot) =>
+            setMessagesFire(snapshot.docs.map(doc=> ({id: doc.id, ...doc.data()}) )))
+        ,
+      []
+    );
   
       employees.map((val)=>{
         
@@ -134,6 +147,44 @@ useEffect(()=>{
       } catch (err) {
         console.log(err);
       }
+      let flag=true;
+      let idtt;
+      messagesFire.map((doc)=>{
+        if(doc.senderId===idMe && doc.receiverId===id){
+          idtt=doc.id;
+          flag=false;
+        }
+      })
+      if(flag===true)
+{     
+      const data = {
+        senderId:idMe,
+        receiverId:id ,
+        msg:texy,
+        
+      };
+     
+   
+     await setDoc(doc(db,"messages",uuidv4()),data);
+    }
+    else{
+      const machinesCollectionRef = collection(db, "messages");
+      await deleteDoc (doc(machinesCollectionRef, idtt));
+      
+      const data = {
+        senderId:idMe,
+        receiverId:id ,
+        msg:texy,
+        
+      };
+     
+   
+     await setDoc(doc(db,"messages",uuidv4()),data);
+
+
+
+    }
+
 
 
 

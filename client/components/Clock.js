@@ -10,6 +10,7 @@ import { onSnapshot, collection, doc, updateDoc,setDoc,getFirestore,deleteDoc} f
 import db from "../Firebase";
 require('moment-precise-range-plugin');
 import { v4 as uuidv4 } from 'uuid';
+import "react-native-get-random-values";
 export default function Clock(){
 const [inClock,setClock]=useState();
 const[hours,setHours]=useState(0);
