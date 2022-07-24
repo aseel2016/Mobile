@@ -20,7 +20,7 @@ let othername;
 
 let imageOther;
 export default function Messenger({ route, navigation }){
-    const { id,idMe } = route.params;
+    const { id,idMe,key } = route.params;
     const [messages2, setMessages2] = useState([]);
 
     const [currentChat, setCurrentChat] = useState(null);
@@ -34,6 +34,20 @@ export default function Messenger({ route, navigation }){
         })
      
     },[]);
+    
+    useEffect(()=>{
+      const deleteNote=async()=>{
+        if(key!=null){
+          const machinesCollectionRef = collection(db, "messages");
+      await deleteDoc (doc(machinesCollectionRef, key));
+
+
+        }
+
+      }
+      deleteNote()
+
+    },[])
 
     useEffect(
       () =>

@@ -19,6 +19,7 @@ import {
 import Axios from 'axios';
 let  messages2=[];
 let  messages3=[];
+let idMe;
 export default function Messages({ navigation }){
     const  [notification,setNotification]=useState([]);
     const [employees,setEmployees]=useState([]);
@@ -80,6 +81,9 @@ export default function Messages({ navigation }){
       }
       
       getData()
+
+
+
       messages2=[];
       messages3=[];
       useEffect(
@@ -89,6 +93,12 @@ export default function Messages({ navigation }){
           ,
         []
       );
+
+      employees.map((val)=>{
+        if(val.email===email){
+          idMe=val._id;
+        }
+      })
 
     //messages
     messages.map(doc=>{
@@ -109,6 +119,7 @@ export default function Messages({ navigation }){
         if(val3._id===val.senderId){
           let data={
             'key':val.id,
+            'id':val3._id,
             'name':val3.firstName+" "+val3.lastName,
             'image':val3.image,
             'message':val.msg,
@@ -159,7 +170,7 @@ export default function Messages({ navigation }){
           style={[styles.rowFront, {height: rowHeightAnimatedValue}]}>
           <TouchableHighlight
             style={styles.rowFrontVisible}
-            onPress={() => console.log('Element touched')}
+            onPress={()=>navigation.navigate("Messenger",{id:data.item.id,idMe:idMe,key:data.item.key})}
             underlayColor={'#aaa'}>
 <View>
             <View style={{flexDirection:'row'}}>
