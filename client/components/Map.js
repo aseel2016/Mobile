@@ -184,8 +184,12 @@ return true;
   
   const getData2 = async () => {
     try {
+     
+
         useEffect(()=>{
-            Axios.get('http://10.0.2.2:3001/getClock').then((response)=>{
+          let isMounted=true;
+          if(isMounted)
+           { Axios.get('http://10.0.2.2:3001/getClock').then((response)=>{
                 setClocks(response.data);
           
               })
@@ -205,7 +209,9 @@ return true;
                
     
               }
-    
+    }
+    return () => { isMounted = false }; // cleanup toggles value, if unmounted
+
            
         })
       

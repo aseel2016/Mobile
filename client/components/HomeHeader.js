@@ -22,10 +22,14 @@ export default function HomeHeader({navigation}){
     const messages3=[];
     
     useEffect(()=>{
-      Axios.get('http://10.0.2.2:3001/getAll').then((response)=>{
+      let isMounted=true;
+      if(isMounted)
+     { Axios.get('http://10.0.2.2:3001/getAll').then((response)=>{
           setEmployees(response.data);
     
-        })
+        })}
+        return () => { isMounted = false }; // cleanup toggles value, if unmounted
+
      
     },[]);
     const getData = async () => {

@@ -46,7 +46,7 @@ async function  handlesign(event){
       try{
         await  AsyncStorage.setItem('Mobile', data.token);
       
-        Alert.alert("successfully logged in")
+        Alert.alert("🔐 Loged in Successfully","Hello: "+emai)
  
 
 
@@ -73,7 +73,8 @@ async function  handlesign(event){
 		} else
 
 		{
-      Alert.alert("failhhh")
+      Alert.alert("📢 Loged in Failed","Please be sure of the entered email and password")
+
 			
 			
 		

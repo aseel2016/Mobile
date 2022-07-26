@@ -11,6 +11,8 @@ import { colors } from '../global/styles';
 import RequestOFF from '../pages/TimeoffRequest';
 import Messenger from '../pages/Messenger'
 import Messages from '../pages/Messages';
+import Applicants from '../pages/Applicants'
+import OutTheoffice from '../pages/OutTheoffice'
 const Stack = createNativeStackNavigator();
 
 export default function NavigateScreens() {
@@ -57,8 +59,14 @@ export default function NavigateScreens() {
 
 
      
+<Stack.Screen  name="Applicants" component={Applicants}
 
-
+       />
+<Stack.Screen  name="OutTheoffice" component={OutTheoffice}
+ options={{title:"out the office"
+  
+}}
+/>
 
 
 

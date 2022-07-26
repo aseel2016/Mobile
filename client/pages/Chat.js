@@ -11,10 +11,15 @@ import {
   Avatar,Button
 }from 'react-native-elements'
 import Axios from 'axios';
+import io from 'socket.io-client/dist/socket.io'
+
 import AsyncStorage from '@react-native-async-storage/async-storage';  
 import { colors } from '../global/styles';
 let employe=[];
 let idMe;
+let y=[];
+let online=[];
+let restEm=[];
 export default function Chat({navigation}){
   const [emai,setEmail]=useState("");
   const [employees,setEmployees]=useState([]);
@@ -22,8 +27,12 @@ export default function Chat({navigation}){
 const [date,setDate]=useState();
   const [show,setShow]=useState(false);
   const [search,setSearch]=useState("");
+  const [onlineUsers, setOnlineUsers] = useState([]);
+  const socket = useRef();
 
-
+  useEffect(() => {
+    socket.current = io("ws://10.0.2.2:8900");
+  }, []);
 
   employe=[];
 
@@ -80,16 +89,8 @@ const datay =  await response.json()
       })
    
   },[]);
-employees.map((val)=>{
-if(val.email!==emai){
 
- employe.push({'id':val._id,'image':val.image,
- 'name':val.firstName+" "+val.lastName
 
-})
-
-}
-})
 employees.map((val)=>{
   if(val.email===emai){
   
@@ -97,7 +98,48 @@ employees.map((val)=>{
   
   }
   })
+  
+  useEffect(() => {
+    socket.current.emit("addUser", idMe);
+    socket.current.on("getUsers", (users) => {
+   setOnlineUsers(users);
 
+    });
+
+    
+  }, [idMe]);
+  console.log(onlineUsers)
+
+  employees.map((val)=>{
+    let flag=false;
+    if(val.email!==emai){
+      onlineUsers.map((val3)=>{
+        if(val3.userId ===val._id){
+             flag=true
+        }
+      })
+      if(flag===true){
+        employe.push({'id':val._id,'image':val.image,
+        'name':val.firstName+" "+val.lastName,
+        'state':'online'
+       
+       })
+
+      }
+      else{
+        employe.push({'id':val._id,'image':val.image,
+        'name':val.firstName+" "+val.lastName,
+        'state':'offline'
+       
+       })
+
+      }
+    
+    
+    
+    
+    }
+    })
 return ( 
 <View >
 
@@ -109,7 +151,7 @@ return (
       justifyContent:'center',
       alignContent:'center',fontSize:25,fontWeight:'bold',color:'grey'}}>Contacts</Text>
   </View>
-  <TextInput placeholder='search' 
+  <TextInput placeholder='search ...' 
   onChangeText={(e)=>setSearch(e)}
 
   style={{fontSize:20,padding:10,margin:10}}/>
@@ -119,14 +161,38 @@ return (
   <View>
     {
       employe.map((val)=>{
+        let y;
+        if(val.state==="offline"){
+          y= <View style={{width: 15,
+            height: 15,
+            borderRadius: 100,
+            backgroundColor: 'red',
+            }}>
+              </View>
+
+        }
+        else if(val.state==="online"){
+          y=<View style={{width: 15,
+            height: 15,
+            borderRadius: 100,
+            backgroundColor: 'limegreen',
+            }}>
+
+          </View>
+
+        }
         if(search!=""){
         if((val.name).includes(search)){
+         
 
           return (
             <View  key={val.id}>
+             
          <TouchableOpacity 
          onPress={()=>navigation.navigate("Messenger",{id:val.id,idMe:idMe})}
          style={{flexDirection:'row',margin:20}}>
+             
+
            <Avatar
     rounded
     avatarStyle={{ borderWidth:2,
@@ -135,7 +201,9 @@ return (
     source={{uri:val.image}}
 
     />
-    <Text style={{margin:10,fontSize:18,fontWeight:'bold'}}>{val.name}</Text>
+   
+    <Text style={{margin:10,fontSize:18,fontWeight:'bold'}}>{val.name}        {y} </Text>
+\   
     </TouchableOpacity>
          
           </View>
@@ -155,7 +223,7 @@ return (
     source={{uri:val.image}}
 
     />
-    <Text style={{margin:10,fontSize:18,fontWeight:'bold'}}>{val.name}</Text>
+    <Text style={{margin:10,fontSize:18,fontWeight:'bold'}}>{val.name}   {y}</Text>
     </TouchableOpacity>
          
           </View>

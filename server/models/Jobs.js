@@ -10,6 +10,9 @@ manager:{
 Description:{
     type:String,
 },
+state:{
+    type:String,
+},
 Keywords:{
     type:[String],
 },

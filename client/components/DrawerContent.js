@@ -80,21 +80,28 @@ const datay =  await response.json()
     getData()
 
     useEffect(()=>{
-      Axios.get('http://10.0.2.2:3001/getAll').then((response)=>{
+      let isMounted=true;
+      if(isMounted)
+      {Axios.get('http://10.0.2.2:3001/getAll').then((response)=>{
           setEmployees(response.data);
     
-        })
+        })}
+        return () => { isMounted = false };
      
     },[employees]);
 
 useEffect(()=>{
-  employees.map((val)=>{
+  let isMounted=true;
+      if(isMounted)
+  {employees.map((val)=>{
     if(val.email===email){
       NameEm=val.firstName+" "+val.lastName;
       image=val.image;
     }
   })
-  setPicked(image)
+  setPicked(image)}
+  return () => { isMounted = false }; // cleanup toggles value, if unmounted
+
 
 },[employees])
 

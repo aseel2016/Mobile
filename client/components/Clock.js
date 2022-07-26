@@ -71,6 +71,8 @@ if (datay.user) {
   
   const getData2 = async () => {
     try {
+      let isMounted = true;    
+      if(isMounted){
         useEffect(()=>{
             Axios.get('http://10.0.2.2:3001/getClock').then((response)=>{
                 setClocks(response.data);
@@ -100,7 +102,8 @@ if (datay.user) {
               }
     
            
-        })
+        })}
+        return () => { isMounted = false }
       
         
       
@@ -189,7 +192,9 @@ async function handleclock(){
    
 }
 useEffect(()=>{
+  let isMounted=true;
   let interval=null;
+  if(isMounted){
   if(inClock){
   
     interval=setInterval(()=>{
@@ -222,7 +227,8 @@ useEffect(()=>{
 
 
   }
-  return ()=>clearInterval(interval)
+}
+  return ()=>{clearInterval(interval); isMounted = false}
 
 },[seconds,inClock])
 

@@ -2,7 +2,7 @@ import React,{useState,useEffect,useRef,useCallback} from 'react';
 import 'react-native-gesture-handler';
 
 import { StyleSheet, Text, View,Alert,Dimensions,TextInput} from 'react-native';
-import { GiftedChat } from 'react-native-gifted-chat'
+import {   GiftedChat } from 'react-native-gifted-chat'
 import HomeHeader from '../components/HomeHeader';
 import Firebase from '../Firebase';
 import { onSnapshot, collection, doc, updateDoc,setDoc,getFirestore,deleteDoc} from "firebase/firestore";
@@ -22,10 +22,15 @@ let imageOther;
 export default function Messenger({ route, navigation }){
     const { id,idMe,key } = route.params;
     const [messages2, setMessages2] = useState([]);
+    const [messages3, setMessages3] = useState([]);
 
     const [currentChat, setCurrentChat] = useState(null);
     const [employees,setEmployees]=useState([]);
     const [messagesFire,setMessagesFire]=useState([]);
+
+
+
+ 
 
     useEffect(()=>{
       Axios.get('http://10.0.2.2:3001/getAllActive').then((response)=>{
@@ -35,6 +40,8 @@ export default function Messenger({ route, navigation }){
      
     },[]);
     
+   
+
     useEffect(()=>{
       const deleteNote=async()=>{
         if(key!=null){
@@ -112,7 +119,7 @@ export default function Messenger({ route, navigation }){
       }
     };
     getMessages();
-  }, [messages2]);
+  }, [id,messages2]);
 
 messages=[];
 const reversed = [...messages2].reverse();
@@ -135,23 +142,31 @@ useEffect(()=>{
         messages.push(y);
     })
        
-
 })
     
 
 
   
-    const onSend =  async(messages) => {
+    const onSend =  async(messages2) => {
       let texy;
-      messages.map((val)=>{
+      
+
+      messages2.map((val)=>{
         texy=val.text;
+       
 
       })
+     
+
       const message = {
         sender: idMe,
         text: texy,
         conversationId: currentChat._id,
       };
+      
+     
+     
+
       try {
         const res = await Axios.post("http://10.0.2.2:3001/addMessage", message);
         setMessages2([...messages2, res.data]);
@@ -208,16 +223,21 @@ useEffect(()=>{
 
 return ( 
 
-<GiftedChat 
-      messages={messages}
-      onSend={messages => onSend(messages)}
-      user={{
-        _id: idMe,
-       
 
-      }}
-      alwaysShowSend={true}
-    />
+    <View style={{ backgroundColor: '#fff', flex: 1 }}>
+        <GiftedChat
+      
+          scrollToBottom
+          messages={messages}
+          onSend={messages => onSend(messages)}
+          user={{
+            _id: idMe,
+           
+          }}
+          alwaysShowSend={true}
+         
+        />
+      </View>
 
  
    );
