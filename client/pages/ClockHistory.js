@@ -9,7 +9,8 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon2 from 'react-native-vector-icons/MaterialIcons';
 import Icon3 from 'react-native-vector-icons/Feather';
 import Icon4 from 'react-native-vector-icons/AntDesign';
-
+import { v4 as uuidv4 } from 'uuid';
+import "react-native-get-random-values";
 import {Button} from 'react-native-elements'
 import Axios from 'axios';
 let clocksAll=[];
@@ -58,6 +59,33 @@ const [date,setDate]=useState();
    const [show,setShow]=useState(false);
 
 
+   const showDatePicker = () => {
+    setDatePickerVisibility(true);
+  };
+
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false);
+  };
+
+  const handleConfirm = (date) => {
+    const y=moment(date)
+    setDatestart(y);
+
+    hideDatePicker();
+  };
+  const showDatePicker2 = () => {
+   setDatePickerVisibility2(true);
+ };
+
+ const hideDatePicker2 = () => {
+   setDatePickerVisibility2(false);
+ };
+
+ const handleConfirm2 = (date) => {
+   const y=moment(date)
+   setDateend(y)
+   hideDatePicker2();
+ };
 
    const getData = async () => {
       try {
@@ -110,10 +138,14 @@ const datay =  await response.json()
    history=[];
    clocksperday=[];
 useEffect(()=>{
-              Axios.get('http://10.0.2.2:3001/getClock').then((response)=>{
+  let isMounted=true;
+  if(isMounted)
+             { Axios.get('http://10.0.2.2:3001/getClock').then((response)=>{
                   setClocks(response.data);
             
-                })})
+                })}
+                return () => { isMounted = false }
+              },[])
                 
                 clocks.map((val)=>{
                   if(val.email===emai){
@@ -268,7 +300,7 @@ return (
 
           }
 
-          return  <View  >
+          return  <View key={uuidv4()}  >
             <TouchableOpacity style={styles.container}  onPress={()=>{
               setDate(val.date)
               

@@ -36,6 +36,7 @@
           "cameraPermission": "The app needs permission to use Camera",
           "photosPermission":	"The app needs permission to access your photos"
         }
+        
       ]
     ]
 

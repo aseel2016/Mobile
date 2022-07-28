@@ -704,15 +704,15 @@ app.post("/insert_event",async(req,res)=>{
   const d =req.body.Description;
 
   const doc = new event({Id:id, Subject:s,StartTime:st,EndTime:et,
-    IsAllDay:is,StartTimezone:stz,EndTimezone:etz,
-    Location:l,RecurrenceRule:rr,resouceID:r,Description:d
+    IsAllDay:is,StartTimezone:" ",EndTimezone:" ",
+    Location:" ",RecurrenceRule:" ",resouceID:r,Description:d
   })
   
   doc.save((err, doc) => {
     if (err) {
       res.status(400).json({ user:false  });
     } else {
-      res.status(200).json({ user: true ,});
+      res.status(200).json({ user: true ,id:doc._id});
     }
   });
 });
@@ -743,7 +743,33 @@ app.post("/update_email",async(req,res)=>{
 
 
 });
+app.post("/update_email2",async(req,res)=>{
 
+  console.log(req.body);
+  const email=req.body.email;
+  const id=req.body.Id;
+  event.findOneAndUpdate(
+    {"_id":id}, 
+
+    { 
+        $addToSet: {Emails:email,}
+    },
+    {
+        returnNewDocument: true
+    }
+  , function( error, result){
+   if(error)
+  {
+    res.json({user:false});
+  }
+   else{
+    res.json({user:true});
+   }
+  });
+ 
+
+
+});
 
 app.get("/getAllEvents",async(req,res)=>{
   event.find({},(err,result)=>{

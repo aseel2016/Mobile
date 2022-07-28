@@ -33,10 +33,15 @@ export default function Messenger({ route, navigation }){
  
 
     useEffect(()=>{
-      Axios.get('http://10.0.2.2:3001/getAllActive').then((response)=>{
+      let isMounted=true;
+      if(isMounted)
+      {Axios.get('http://10.0.2.2:3001/getAllActive').then((response)=>{
           setEmployees(response.data);
     
-        })
+        })}
+        return () => { isMounted = false }
+
+
      
     },[]);
     
@@ -108,7 +113,9 @@ export default function Messenger({ route, navigation }){
    getData2()
 
    useEffect(() => {
-    const getMessages = async () => {
+    let isMounted=true;
+    if(isMounted)
+   { const getMessages = async () => {
       try {
         const res = await Axios.get("http://10.0.2.2:3001/getCon/" + currentChat?._id);
         setMessages2(res.data);
@@ -118,13 +125,17 @@ export default function Messenger({ route, navigation }){
         console.log(err);
       }
     };
-    getMessages();
+    getMessages();}
+    return () => { isMounted = false }
+
   }, [id,messages2]);
 
 messages=[];
 const reversed = [...messages2].reverse();
 useEffect(()=>{
-    reversed.map((val)=>{
+  let isMounted=true
+  if(isMounted)
+  {  reversed.map((val)=>{
       
  let y={
            
@@ -140,8 +151,9 @@ useEffect(()=>{
 
         
         messages.push(y);
-    })
-       
+    })}
+    return () => { isMounted = false }
+ 
 })
     
 

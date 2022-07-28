@@ -77,6 +77,8 @@ target 'FoodFinder' do
   pod 'glog', :podspec => '../node_modules/react-native/third-party-podspecs/glog.podspec'
   pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
 
+  pod 'RNCalendarEvents', :path => '../node_modules/react-native-calendar-events'
+
   target 'FoodFinderTests' do
     inherit! :complete
     # Pods for testing

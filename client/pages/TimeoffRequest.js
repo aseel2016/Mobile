@@ -1,29 +1,34 @@
 import React,{useState,useEffect,useRef} from 'react';
-import { StyleSheet,ScrollView, Text
-  , View,TouchableOpacity,Modal,Animated
-  ,Alert,Dimensions,TextInput} from 'react-native';
-  import { v4 as uuidv4 } from 'uuid';
-  import "react-native-get-random-values"; // required as a polyfill for uuid. See info here: https://github.com/uuidjs/uuid#getrandomvalues-not-supported
+import 'react-native-gesture-handler';
+
+import { StyleSheet, Text,TouchableOpacity, View,ScrollView,Alert,Dimensions} from 'react-native';
+import {Calendar, CalendarList} from 'react-native-calendars';
+import HomeHeader from '../components/HomeHeader';
+import {Agenda, DateData, AgendaEntry, AgendaSchedule} from 'react-native-calendars';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import * as Animatable from 'react-native-animatable';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon2 from 'react-native-vector-icons/Fontisto';
+import Icon3 from 'react-native-vector-icons/Ionicons';
+import Axios from 'axios';
+import moment from 'moment'
+import AsyncStorage from '@react-native-async-storage/async-storage';  
+import { colors } from '../global/styles';
+import { Card,Avatar,IconButton } from 'react-native-paper';
+import { Modal, Portal,Snackbar ,TextInput,Checkbox  ,  Button, Provider } from 'react-native-paper';
+import { v4 as uuidv4 } from 'uuid';
+import "react-native-get-random-values";
+
+ // required as a polyfill for uuid. See info here: https://github.com/uuidjs/uuid#getrandomvalues-not-supported
 
   import 'firebase/firestore';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import Icon2 from 'react-native-vector-icons/MaterialIcons';
-import Icon3 from 'react-native-vector-icons/Feather';
-import Icon4 from 'react-native-vector-icons/AntDesign';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 import Firebase from '../Firebase';
 import { onSnapshot, collection, doc, updateDoc,setDoc,getFirestore,deleteDoc} from "firebase/firestore";
 import db from "../Firebase";
-import HomeHeader from '../components/HomeHeader';
-import AsyncStorage from '@react-native-async-storage/async-storage';  
-import moment, { preciseDiff } from 'moment';
-import { colors } from '../global/styles';
-import * as Animatable from 'react-native-animatable';
+import  { preciseDiff } from 'moment';
 import {Picker} from '@react-native-picker/picker';
-
-import {Button} from 'react-native-elements'
-import Axios from 'axios';
 let requestOffEm=[];
 let idEm;
 let first;
@@ -37,22 +42,17 @@ let types=[];
 
 export default function RequestOFF({navigation}){
    const [emai,setEmail]=useState("");
-   const [requests,setRequests]=useState([]);
-   const [requests2,setRequests2]=useState([]);
-
    const [employees,setEmployees]=useState([]);
-   const [show,setShow]=useState(false);
-   const [show2,setShow2]=useState(false);
-const [desc,setDes]=useState("");
-   const [start,setStart]=useState("");
-   const [end,setEnd]=useState("");
-   const [Description,setDescription]=useState("");
-   const [datestart, setDatestart] = useState(new Date())
-   const [dateend, setDateend] = useState(new Date())
    const [type,setType]=useState("");
-   const [showe,setshoe2]=useState(false)
-   const [showe2,setshoe22]=useState(false)
+ 
+ const [visible, setVisible] = useState(false);
+ const [sub, setSub] = useState("");
+ const [desc, setDesc] = useState("");
+ const [dateStart, setDatestart] =useState(moment());
 
+ const [dateend, setDateend] = useState(moment());
+ 
+ const onDismissSnackBar = () => setVisible(false);
 
 
 
@@ -71,7 +71,8 @@ const [desc,setDes]=useState("");
  
    const handleConfirm = (date) => {
      console.warn("A date has been picked: ", date);
-     setDatestart(date);
+    
+     setDatestart( moment(date));
 
      hideDatePicker();
    };
@@ -85,7 +86,7 @@ const [desc,setDes]=useState("");
 
   const handleConfirm2 = (date) => {
     console.warn("A date has been picked: ", date);
-    setDateend(date)
+    setDateend( moment(date))
     hideDatePicker2();
   };
 
@@ -140,13 +141,15 @@ const datay =  await response.json()
     getData()
 
     useEffect(()=>{
-      
-
-     Axios.get('http://10.0.2.2:3001/getAll').then((response)=>{
+      let isMounted=true
+if(isMounted)
+    { Axios.get('http://10.0.2.2:3001/getAll').then((response)=>{
             setEmployees(response.data);
       
-          })
-        
+          })}
+
+          return () => { isMounted = false }
+
        
        })
 
@@ -187,7 +190,15 @@ const datay =  await response.json()
 
     
     async function handlerequest(){
-      Alert.alert("📢Successfully sent","💫Yoy will get the reply as soon as possible")
+      const y=dateStart.format("YYYY-MM-DD ")
+      const h=dateStart.format("hh:mm:ss")
+      const f=(y+"T"+h).toString();
+      const f2=new Date(f)
+  
+      const y1=dateend.format("YYYY-MM-DD")
+      const h1=dateend.format("hh:mm:ss")
+      const f1=(y1+"T"+h1).toString();
+      const f3=new Date(f1)
 
       const response =  await fetch('http://10.0.2.2:3001/insert_request', {
         method: 'POST',
@@ -199,8 +210,8 @@ const datay =  await response.json()
          id:idEm,
          type:type,
          description:desc,
-         start:new Date(datestart),
-         end:new Date(dateend),
+         start:f2,
+         end:f3,
          
           
         }),
@@ -210,6 +221,8 @@ const datay =  await response.json()
 
   if (datay.user) { 
    idReq=datay.id;
+   Alert.alert("📢Successfully sent","💫Yoy will get the reply as soon as possible")
+
    
    
   } else
@@ -238,86 +251,118 @@ const datay =  await response.json()
 return ( 
   <ScrollView style={{width:'100%'}}>
 <View >
+<Provider>
+  <View style={{flexDirection:'row'}}>
+
+<Text
+ style={{fontSize:19,fontWeight:'800',
+ margin:10}}>🔑Type</Text>
+ <Picker style={{width:'100%'}}
+ selectedValue={type}
+ onValueChange={(itemValue,itemIndex)=>setType(itemValue)}>
+   {
+     types.map((val)=>{
+       return <Picker.Item label={val} key={val}  value={val}/>
+     })
+   }
+ </Picker>
+
+
+</View>
+ 
+    
+    <TextInput
+      label="Description"
+      value={desc}
+      onChangeText={text => setDesc(text)}
+      style={{margin:10}}
+      multiline={true}
+      numberOfLines={3}
+      
 
       
 
-       
-          <View style={{flexDirection:'row'}}>
-
-       <Text
-        style={{fontSize:19,fontWeight:'800',
-        margin:10}}>Type</Text>
-        <Picker style={{width:'100%'}}
-        selectedValue={type}
-        onValueChange={(itemValue,itemIndex)=>setType(itemValue)}>
-          {
-            types.map((val)=>{
-              return <Picker.Item label={val} key={val}  value={val}/>
-            })
-          }
-        </Picker>
+    />
+    
+    <View style={{flexDirection:'row'}}>
+    <IconButton mode="contained"
+    icon="calendar"
+         onPress={showDatePicker}/>
   
 
-       </View>
-       <View style={{flexDirection:'row'}}>
-       <Text style={{fontSize:19,fontWeight:'800',margin:10}}>Description</Text>
-       
-       <TextInput
-          style={{borderColor:'grey',borderWidth:1}}
-          value={desc}
-         placeholder="Description"
-         borderColor='grey'
-            width={220}    
-          onChangeText={(Text)=>{setDes(Text)}}
-          autoCorrect={false}
-        />
-       
-       </View>
-       <View style={{flexDirection:'row'}}>
-      
-       <Button title="Pick start date" titleStyle={{fontSize:19,fontWeight:'800',margin:10}}
-       onPress={showDatePicker}
-       buttonStyle={{margin:10,alignItems:'center',alignContent:'center',backgroundColor:'#69F32D'}}
-       
-       
-       />
-       <DateTimePickerModal
+  <DateTimePickerModal
         isVisible={isDatePickerVisible}
         mode="date"
         onConfirm={handleConfirm}
         onCancel={hideDatePicker}
       />
-       
-       
-       
-
-
-       
-       </View>
-       <View style={{flexDirection:'row'}}>
-
-       <Button title="Pick end date" titleStyle={{fontSize:19,fontWeight:'800',margin:10}}
+       <TextInput
+     
+      label="Start date"
+      value={dateStart.format("YYYY-MM-DD")}
       
-       buttonStyle={{margin:10,alignItems:'center',backgroundColor:'#69F32D'}}
-       onPress={showDatePicker2}
+      style={{width:335,marginVertical:10,color:'black'}}
+      
+     
+    />
 
-       />
+
+
+      
        
+       
+       
+</View>
+       
+<View style={{flexDirection:'row'}}>
+
+  <IconButton mode="contained"
+    icon="calendar"
+         onPress={showDatePicker2}
+         />
+
+<TextInput
+     
+     label="End date"
+     value={dateend.format("YYYY-MM-DD")}
+     
+     style={{width:335,marginVertical:10}}
+     
+    
+   />
+   
+     
+     
+</View>
+
        <DateTimePickerModal
         isVisible={isDatePickerVisible2}
         mode="date"
         onConfirm={handleConfirm2}
         onCancel={hideDatePicker2}
       />
-       
-        </View>
+
+ 
+
+<Button  mode="contained"  style={{marginVertical:40,marginHorizontal:50,padding:10,backgroundColor:'green'}} onPress={handlerequest}>
+    Send Request
+  </Button>
+ 
+         
       
-       <Button  
-       title="Send"
-       buttonStyle={{backgroundColor:colors.buttons,margin:20}}
-        titleStyle={{fontSize:20,fontWeight:'800'}}
-         onPress={handlerequest}
-          />
+   
+   
+  
+  
+</Provider>
+      
+
+       
+         
+      
+     
+       
+      
           
           
           
