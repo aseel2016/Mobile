@@ -125,7 +125,7 @@ const datay =  await response.json()
    getData()
 
    useEffect(()=>{
-     Axios.get('http://10.0.2.2:3001/getAll').then((response)=>{
+     Axios.get('http://10.0.2.2:3001/getAllActive').then((response)=>{
          setEmployees(response.data);
    
        })

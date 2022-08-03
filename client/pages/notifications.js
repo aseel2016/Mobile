@@ -9,15 +9,21 @@ import Firebase from '../Firebase';
 import { onSnapshot, collection, doc, updateDoc,setDoc,getFirestore,deleteDoc} from "firebase/firestore";
 import db from "../Firebase";
 import {Button} from 'react-native-elements'
-import axios from 'axios';
+import Axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';  
 import {colors,parameters} from '../global/styles'
 import { SwipeListView } from 'react-native-swipe-list-view';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-export default function Notifications(){
+
+let accessible;
+export default function Notifications({navigation}){
    const  [notification,setNotification]=useState([]);
+   const  [notificationjob,setNotificationjob]=useState([]);
+      const [employees,setEmployees]=useState([]);
    const[email,setEmail]=useState('')
+
    const notification2=[];
+   const notificationjob2=[];
    let data=[];
    const getData = async () => {
       try {
@@ -65,13 +71,43 @@ const datay =  await response.json()
     }
     
     getData()
+    useEffect(()=>{
+      let isMounted=true;
+      if(isMounted)
+     { Axios.get('http://10.0.2.2:3001/getAllActive').then((response)=>{
+          setEmployees(response.data);
+    
+        })}
+        return () => { isMounted = false }
+     
+    },[]);
 
+employees.map((val)=>{
+  if(val.email===email){
+    if(val.accessible==="No"){
+      accessible=false;
 
+    }
+    else{
+      accessible=true;
+
+    }
+
+  }
+})
 
   useEffect(
       () =>
             onSnapshot(collection(db, "notifications"), (snapshot) =>
             setNotification(snapshot.docs.map(doc=> ({id: doc.id, ...doc.data()}) )))
+        ,
+      []
+    );
+
+    useEffect(
+      () =>
+            onSnapshot(collection(db, "jobs"), (snapshot) =>
+            setNotificationjob(snapshot.docs.map(doc=> ({id: doc.id, ...doc.data()}) )))
         ,
       []
     );
@@ -86,16 +122,50 @@ const datay =  await response.json()
      };
     })
 
-  
+  accessible?( notification2.map((val)=>{
+    let f={
+      'key':val.id,
+      'idEm': val.employee_id,
+      'name':val.employee_first_name+" "+val.employee_last_name,
+      'title':val.message,
+      'requestId':val.Request_id,
+
+    }
+    data.push(f);
+
+  })):(
     notification2.map((val)=>{
       let f={
         'key':val.id,
+         'title':val.message,
+
+          }
+              data.push(f);
+
+    })
+  )
+   
+
+  { /* notificationjob2.map((val)=>{
+      let f={
+        'key':val.id,
+
         'title':val.message,
 
       }
       data.push(f);
-
+       notificationjob.map(doc=>{
+      const g=doc.Rec_email;
+      
+     
+     if(g===email){
+      notificationjob2.push(doc);
+     };
     })
+
+
+    })*/}
+    
     
   
     const onLeftActionStatusChange = rowKey => {
@@ -138,12 +208,33 @@ const datay =  await response.json()
           style={[styles.rowFront, {height: rowHeightAnimatedValue}]}>
           <TouchableHighlight
             style={styles.rowFrontVisible}
-            onPress={() => console.log('Element touched')}
+          
+
+            onPress={()=>
+              {accessible?navigation.navigate("RequestHR",{name:data.item.name,
+                keyNote:data.item.key,idEm:data.item.idEm,
+                reqId:data.item.requestId
+              
+              }):
+              console.log("Elementtouched")}
+              }
             underlayColor={'#aaa'}>
             <View>
-              <Text style={styles.title} numberOfLines={1}>
-                {data.item.title}
-              </Text>
+              
+                {accessible? <View style={{flexDirection:'row'}}>
+                  <Text style={styles.title} numberOfLines={1}>{data.item.name}
+                  </Text> 
+                  <Text style={styles.title} numberOfLines={1}> {data.item.title}
+                  </Text> 
+                  
+                  </View>
+                :
+                <View><Text style={styles.title} numberOfLines={1}> {data.item.title}</Text></View>
+                }
+                
+              
+            
+
              
             </View>
           </TouchableHighlight>

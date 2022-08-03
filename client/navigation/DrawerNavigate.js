@@ -6,8 +6,9 @@ import RootClient from './ClientTabs'
 import Icon from 'react-native-vector-icons/Entypo';
 import Icon2 from 'react-native-vector-icons/Fontisto';
 import Icon4  from 'react-native-vector-icons/AntDesign';
+import RequestOFF from '../pages/TimeoffRequest';
 
-
+import { View } from 'react-native';
 import Icon5  from 'react-native-vector-icons/FontAwesome';
 
 import Calender from '../pages/Calender';
@@ -23,11 +24,13 @@ import Drawercontent  from '../components/DrawerContent';
 import Recruitment  from '../pages/Recruitmrnt';
 import AsyncStorage from '@react-native-async-storage/async-storage';  
 import  Axios  from 'axios';
+import Reset from '../pages/ResetPassword'
 import Chat from'../pages/Chat'
 import { useNavigationContainerRef } from '@react-navigation/native';
 const Drawer = createDrawerNavigator();
 
 let idMe;
+let accessible;
 export default function DawNav() {
 
 
@@ -124,6 +127,19 @@ const datay =  await response.json()
 
 
 
+    employees.map((val)=>{
+      if(val.email===emai){
+        if(val.accessible==="No"){
+          accessible=false;
+    
+        }
+        else{
+          accessible=true;
+    
+        }
+    
+      }
+    })
     return (
      
         <Drawer.Navigator useLegacyImplementation  screenOptions={{headerShown:false}}
@@ -144,6 +160,16 @@ const datay =  await response.json()
            
             drawerIcon:({focussed,size})=>(
             <Icon3 name="account-circle-outline" color={colors.buttons} size={size} />
+            )
+
+          }}
+          />
+           <Drawer.Screen name="Reset" component={Reset} 
+          options={{
+            title:"Reset password",
+           
+            drawerIcon:({focussed,size})=>(
+            <Icon3 name="form-textbox-password" color={colors.buttons} size={size} />
             )
 
           }}
@@ -169,9 +195,19 @@ const datay =  await response.json()
 
           }}
           />
+          <Drawer.Screen name="RequestOFF" component={RequestOFF} 
+          options={{
+            title:" Time off requests",
+           
+            drawerIcon:({focussed,size})=>(
+            <Icon2 name="holiday-village" color={colors.buttons} size={size} />
+            )
+
+          }}
+          />
            <Drawer.Screen name="MyLocation" component={Location} 
           options={{
-            title:"My Location",
+            title:"Location History",
            
             drawerIcon:({focussed,size})=>(
             <Icon5 name="map-marker" color="green" size={size} />
@@ -193,8 +229,9 @@ const datay =  await response.json()
           
           
           }
-          
-            <Drawer.Screen name="MyCalender" component={Calender} 
+          {accessible?null:
+         
+              <Drawer.Screen name="MyCalender" component={Calender} 
           options={{
             title:"My Calender",
            
@@ -203,9 +240,9 @@ const datay =  await response.json()
             )
 
           }}
-          />
+          />}
 
-
+{accessible?null:
           <Drawer.Screen name="Team" component={Team} 
           options={{
             title:"Team",
@@ -215,7 +252,10 @@ const datay =  await response.json()
             )
 
           }}
-          />
+          />}
+          
+          
+          
        
             <Drawer.Screen name="Chat" component={Chat} 
           options={{

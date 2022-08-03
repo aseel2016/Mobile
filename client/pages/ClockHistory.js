@@ -12,14 +12,17 @@ import Icon4 from 'react-native-vector-icons/AntDesign';
 import { v4 as uuidv4 } from 'uuid';
 import "react-native-get-random-values";
 import {Button} from 'react-native-elements'
+
 import Axios from 'axios';
 let clocksAll=[];
 let history=[];
 let clocksperday=[];
+let accessible;
 
 const ModalPoup = ({visible, children}) => {
   const [showModal, setShowModal] = React.useState(visible);
   const scaleValue = React.useRef(new Animated.Value(0)).current;
+ 
   React.useEffect(() => {
     toggleModal();
   }, [visible]);
@@ -57,8 +60,17 @@ export default function ClockHistory({navigation}){
    const [clocks,setClocks]=useState([])
 const [date,setDate]=useState();
    const [show,setShow]=useState(false);
+   const [show2,setShow2]=useState(false);
+   const[cohsen,setChosenName]=useState("")
 
-
+   
+   useEffect(()=>{
+    Axios.get('http://10.0.2.2:3001/getAllActive').then((response)=>{
+        setEmployees(response.data);
+  
+      })
+   
+  },[]);
    const showDatePicker = () => {
     setDatePickerVisibility(true);
   };
@@ -145,9 +157,48 @@ useEffect(()=>{
             
                 })}
                 return () => { isMounted = false }
-              },[])
+              },[clocks])
+                accessible?  clocks.map((val)=>{
+
+                    if(val.Clockout!=null){
+              let t= moment(val.Clockin).utc().format('hh:mm:ss');
+              let x= moment(val.Clockin).utc().format('YYYY/MM/DD');
+               
+    
+    
+              const ss=moment(val.Clockin);
+              const ee=moment(val.Clockout);
+              const r=moment.preciseDiff(ss,ee,true);
+              const yyy=r['hours']+(r['minutes']/60.0)
+
+              const hours=r['hours']+"H: "+r['minutes']+"M: "+r['seconds']+"S"
+              let tt= moment(val.Clockout).utc().format('hh:mm:ss');
+              let xx= moment(val.Clockout).utc().format('YYYY/MM/DD');
+
+              let data={
+                'id':val._id,
+                'email':val.email,
                 
-                clocks.map((val)=>{
+                
+                'clockintime':t,
+                'clockindate':x,
+                'clockouttime':tt,
+                'clockoutdate':xx,
+                'totalHours':hours,
+                'yyy':yyy,
+            };
+  
+            clocksAll.push(data);
+
+                   
+
+
+
+          }})
+
+                :  clocks.map((val)=>{
+
+
                   if(val.email===emai){
                     if(val.Clockout!=null){
               let t= moment(val.Clockin).utc().format('hh:mm:ss');
@@ -183,91 +234,180 @@ useEffect(()=>{
 
 
           }}})
+              
           history=[];
 
-
-          clocksAll.map((val,key)=>{
+accessible? clocksAll.map((val,key)=>{
         
-            clocksAll.map((val2,key2)=>{
-            if(val.clockindate===val2.clockindate && val.clockoutdate===val2.clockoutdate 
-            && val.id!==val2.id){
-              if(history.length!=0){
-                let flage=false;
-              history.map((valt,key)=>{
-                if(valt.in===val.clockindate){
-                  flage=true;}
-              })
-              if(flage===false){
-                history.push({in:val.clockindate,total:0})
+  clocksAll.map((val2,key2)=>{
+  if(val.clockindate===val2.clockindate && val.clockoutdate===val2.clockoutdate 
+  && val.id!==val2.id && val.email===val2.email){
+    if(history.length!=0){
+      let flage=false;
+    history.map((valt,key)=>{
+      if(valt.in===val.clockindate){
+        flage=true;}
+    })
+    if(flage===false){
+      history.push({in:val.clockindate,total:0,email:val.email})
 
-              }
-            }
-            else{
-            
-              
-              history.push({in:val.clockindate,total:0})
-                  
-            }
-          }
+    }
+  }
+  else{
+  
+    
+    history.push({in:val.clockindate,total:0,email:val.email})
         
-            }
-            
-            ) })
+  }
+}
 
-            clocksAll.map((val,key)=>{
-              let r=false;
-              let duration;
-              history.map((val2,key2)=>{
-                if(val2.in===val.clockindate)
-                {
-                    r=true;
-                    val2.total=val2.total+val.yyy 
-                  
-                }
-                
+  }
+  
+  ) }): clocksAll.map((val,key)=>{
+        
+  clocksAll.map((val2,key2)=>{
+  if(val.clockindate===val2.clockindate && val.clockoutdate===val2.clockoutdate 
+  && val.id!==val2.id){
+    if(history.length!=0){
+      let flage=false;
+    history.map((valt,key)=>{
+      if(valt.in===val.clockindate){
+        flage=true;}
+    })
+    if(flage===false){
+      history.push({in:val.clockindate,total:0})
+
+    }
+  }
+  else{
+  
     
-              })
-    
-             if(r){
-    
-             }
-                
-              else{
-                 
-                let data ={
-                  'total':val.totalHours  ,
-                  'date':val.clockindate ,
-                }
-                clocksperday.push(data)
+    history.push({in:val.clockindate,total:0})
+        
+  }
+}
+
+  }
+  
+  ) })
+         
+accessible? clocksAll.map((val,key)=>{
+  let r=false;
+  let duration;
+  history.map((val2,key2)=>{
+    if(val2.in===val.clockindate && val2.email===val.email)
+    {
+        r=true;
+        val2.total=val2.total+val.yyy 
       
+    }
     
+
+  })
+
+ if(r){
+
+ }
     
-              }
-              
-              
+  else{
+     
+    let data ={
+      'total':val.totalHours  ,
+      'date':val.clockindate ,
+      'email':val.email,
+    }
+    clocksperday.push(data)
+
+
+
+  }
+  
+  
+
+})
+: clocksAll.map((val,key)=>{
+  let r=false;
+  let duration;
+  history.map((val2,key2)=>{
+    if(val2.in===val.clockindate)
+    {
+        r=true;
+        val2.total=val2.total+val.yyy 
+      
+    }
     
-            })
-            history.map((val,key)=>{
+
+  })
+
+ if(r){
+
+ }
+    
+  else{
+     
+    let data ={
+      'total':val.totalHours  ,
+      'date':val.clockindate ,
+    }
+    clocksperday.push(data)
+
+
+
+  }
+  
+  
+
+})
+     accessible?history.map((val,key)=>{
           
-              const p=Math.floor(val.total)
-              const uu=val.total-p;
-              if(p===val.total){
-                const pp=p+"H: "+"0"+"M: "+"0S"
-                clocksperday.push({'total':pp,'date':val.in})
-              }
-              else{
-                const u=uu*60;
-                const u3=Math.ceil(u);
-                const pp=p+"H: "+u3+"M: "+"0S"
+      const p=Math.floor(val.total)
+      const uu=val.total-p;
+      if(p===val.total){
+        const pp=p+"H: "+"0"+"M: "+"0S"
+        clocksperday.push({'total':pp,'date':val.in,'email':val.email})
+      }
+      else{
+        const u=uu*60;
+        const u3=Math.ceil(u);
+        const pp=p+"H: "+u3+"M: "+"0S"
+
+        clocksperday.push({'total':pp,'date':val.in,'email':val.email})
+      }
+     
+    }):history.map((val,key)=>{
+          
+      const p=Math.floor(val.total)
+      const uu=val.total-p;
+      if(p===val.total){
+        const pp=p+"H: "+"0"+"M: "+"0S"
+        clocksperday.push({'total':pp,'date':val.in})
+      }
+      else{
+        const u=uu*60;
+        const u3=Math.ceil(u);
+        const pp=p+"H: "+u3+"M: "+"0S"
+
+        clocksperday.push({'total':pp,'date':val.in})
+      }
+     
+    })      
+            
+
     
-                clocksperday.push({'total':pp,'date':val.in})
+
+            employees.map((val)=>{
+              if(val.email===emai){
+                if(val.accessible==="No"){
+                  accessible=false;
+            
+                }
+                else{
+                  accessible=true;
+            
+                }
+            
               }
-             
             })
-
-    
-
-
         
      
 
@@ -275,89 +415,241 @@ useEffect(()=>{
         
       
     
-   
+accessible?
+clocksperday.map((val)=>{
+  employees.map((valr)=>{
+    if(valr.email===val.email){
+      val.email=valr.firstName+" "+valr.lastName;
+    }
+  })
+})
+:null
+
+function handlepress(){
+Alert.alert("date")
+}
 return ( 
 <View >
        <HomeHeader navigation={navigation}/>
-       <TouchableOpacity style={styles.container}  >
+
+       {accessible?
+       <View>
+        <TouchableOpacity style={styles.container2} 
+       >
            
-            <Text style={styles.text}>         Date          </Text>
-            <Text style={styles.text}>      Duration  </Text>
+           <Text style={styles.text2}>    Name               </Text>
+           <Text style={styles.text2}>      Date           </Text>
+           <Text style={styles.text2}>      Duration  </Text>
+
+          
+          
+           </TouchableOpacity>
+
+
            
-           
-            </TouchableOpacity>
-       
-       
-       {
-        clocksperday.map((val,key)=>{
-          let icon;
+      {
+       clocksperday.map((val,key)=>{
+         let icon;
 
-          if(val.total>="8H: 0M: 0S"){
-            icon=<Icon4  style={styles.textIcon} name="checkcircle" color="green" size={30}/>
-          }
-          else{
-            icon=<Icon2  style={styles.textIcon} name="error" color="red" size={30}/>
+         if(val.total>="8H: 0M: 0S"){
+           icon=<Icon4  style={{margin:5}} name="checkcircle" color="green" size={28}/>
+         }
+         else{
+           icon=<Icon2  style={{margin:5}} name="error" color="red" size={28}/>
 
-          }
+         }
 
-          return  <View key={uuidv4()}  >
-            <TouchableOpacity style={styles.container}  onPress={()=>{
-              setDate(val.date)
-              
-              setShow(true)}}>
-            {icon}
-            <Text style={styles.text}>{val.date}   </Text>
-            <Text style={styles.text}>{val.total}  </Text>
-            <Icon3  style={styles.textIcon2} name='arrow-right' />
-            </TouchableOpacity>
-            
-            </View>
-        })
-       }
-      
-     
-    { show && <ModalPoup visible={show}>
-        <View style={{alignItems: 'center'}}>
-          <View style={styles.header}>
-           <Icon4  name='close'size={25} onPress={()=>setShow(false)}/>
-          </View>
-        </View>
-      
-
-        
-           {
-            clocksAll.map((val,key)=>{
-              const y=val.clockindate
-              if(y===date){
-    
-              return  (<View style={styles.container} >
-      <Icon4 name='clockcircleo' size={25} style={{marginLeft:10,marginTop:15}}/>
-
-
-                <Text style={styles.textjj}>
-                  
-                  {val.clockintime}---{val.clockouttime}</Text>
-               
-                </View>);
-                }
+         return  <View key={uuidv4()}  >
+           <TouchableOpacity
+          
+           style={styles.container2}
+           onPress={()=>{
+            setDate(val.date)
+            employees.map((valut)=>{
+              if(valut.firstName+" "+valut.lastName===val.email){
+                setChosenName(valut.email)
+              }
             })
-           }
-          
+            
+            setShow(true)}} 
+           
+            >
+           {icon}
+           <Text style={styles.text2}>{val.email}   </Text>
+           <Text style={styles.text2}>{val.date}   </Text>
+           <Text style={styles.text2}>{val.total}  </Text>
+           </TouchableOpacity>
+           
+           </View>
+       })
+      }
+       { show && <ModalPoup visible={show}>
+       <View style={{alignItems: 'center'}}>
+         <View style={styles.header}>
+          <Icon4  name='close'size={25} onPress={()=>setShow(false)}/>
+         </View>
+       </View>
+     
+
+       
+          {
+           clocksAll.map((val,key)=>{
+             const y=val.clockindate
+             if(y===date && cohsen===val.email ){
+   
+             return  (<View style={styles.container} >
+     <Icon4 name='clockcircleo' size={25} style={{marginLeft:10,marginTop:15}}/>
+
+
+               <Text style={styles.textjj}>
+                 
+                 {val.clockintime}---{val.clockouttime}</Text>
+              
+               </View>);
+               }
+           })
+          }
+         
 
 
 
 
-          
-        
-      </ModalPoup>}
+         
+       
+     </ModalPoup>}
       
+
+       </View>
+       :
+       <View>
+         <TouchableOpacity style={styles.container}  >
+           
+           <Text style={styles.text}>         Date          </Text>
+           <Text style={styles.text}>      Duration  </Text>
+          
+          
+           </TouchableOpacity>
+      
+      
+      {
+       clocksperday.map((val,key)=>{
+         let icon;
+
+         if(val.total>="8H: 0M: 0S"){
+           icon=<Icon4  style={styles.textIcon} name="checkcircle" color="green" size={30}/>
+         }
+         else{
+           icon=<Icon2  style={styles.textIcon} name="error" color="red" size={30}/>
+
+         }
+
+         return  <View key={uuidv4()}  >
+           <TouchableOpacity style={styles.container}  onPress={()=>{
+             setDate(val.date)
+             
+             setShow(true)}}>
+           {icon}
+           <Text style={styles.text}>{val.date}   </Text>
+           <Text style={styles.text}>{val.total}  </Text>
+           <Icon3  style={styles.textIcon2} name='arrow-right' />
+           </TouchableOpacity>
+           
+           </View>
+       })
+      }
+     
+    
+   { show && <ModalPoup visible={show}>
+       <View style={{alignItems: 'center'}}>
+         <View style={styles.header}>
+          <Icon4  name='close'size={25} onPress={()=>setShow(false)}/>
+         </View>
+       </View>
+     
+
+       
+          {
+           clocksAll.map((val,key)=>{
+             const y=val.clockindate
+             if(y===date ){
+   
+             return  (<View style={styles.container} >
+     <Icon4 name='clockcircleo' size={25} style={{marginLeft:10,marginTop:15}}/>
+
+
+               <Text style={styles.textjj}>
+                 
+                 {val.clockintime}---{val.clockouttime}</Text>
+              
+               </View>);
+               }
+           })
+          }
+         
+
+
+
+
+         
+       
+     </ModalPoup>}
+        
+    
+
+
+      </View>}
+      
+   
        
 
 
     </View>
    );
 }
-const styles = StyleSheet.create({
+
+ const styles = StyleSheet.create({
+  container2: {
+    
+    flexDirection:'row',
+    
+    marginVertical:5,
+    paddingVertical:10,
+    borderWidth:1,
+    borderColor:'grey',
+    backgroundColor:'white',
+    borderRadius:10,
+
+    
+ 
+  },
+  text2:{
+    fontSize:17,
+    fontWeight:'bold',
+    margin:5,
+
+  },
+  textjj2:{
+    fontSize:20,
+    fontWeight:'bold',
+    margin:12,
+    marginLeft:20
+
+  },
+  textIcon22:{
+    fontSize:20,
+    fontWeight:'bold',
+    margin:15,
+    borderRadius:100,
+    borderWidth:1,
+    color:colors.buttons,
+
+  },
+  textIcon2:{
+    marginLeft:5,
+    marginTop:5,
+    marginRight:5,
+
+  },
   container: {
     
     flexDirection:'row',
@@ -400,6 +692,7 @@ const styles = StyleSheet.create({
     marginRight:10,
 
   },
+
   modalBackGround: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
@@ -421,5 +714,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
  
-});
+})
+
 

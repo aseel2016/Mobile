@@ -13,6 +13,7 @@ import Messenger from '../pages/Messenger'
 import Messages from '../pages/Messages';
 import Applicants from '../pages/Applicants'
 import OutTheoffice from '../pages/OutTheoffice'
+import RequestHR from '../pages/RequestHr'
 const Stack = createNativeStackNavigator();
 
 export default function NavigateScreens() {
@@ -36,8 +37,11 @@ export default function NavigateScreens() {
 
      
      />
-      <Stack.Screen  name="RequestOFF" component={RequestOFF} 
-     options={{title:"Send request off"
+      
+     
+
+     <Stack.Screen  name="RequestHR" component={RequestHR} 
+     options={{title:"Review time off request "
   
      }}
 

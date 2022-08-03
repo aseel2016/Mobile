@@ -70,7 +70,6 @@ export default function RequestOFF({navigation}){
    };
  
    const handleConfirm = (date) => {
-     console.warn("A date has been picked: ", date);
     
      setDatestart( moment(date));
 
@@ -85,7 +84,6 @@ export default function RequestOFF({navigation}){
   };
 
   const handleConfirm2 = (date) => {
-    console.warn("A date has been picked: ", date);
     setDateend( moment(date))
     hideDatePicker2();
   };
@@ -151,7 +149,7 @@ if(isMounted)
           return () => { isMounted = false }
 
        
-       })
+       },[])
 
 
 
@@ -173,7 +171,8 @@ if(isMounted)
               setTotaldays(response.data);
              
             
-            })})
+            })
+          },[])
             types=[];
 
         totalDays.map((val)=>{
@@ -188,9 +187,10 @@ if(isMounted)
 
           }) 
 
-    
+
+
     async function handlerequest(){
-      const y=dateStart.format("YYYY-MM-DD ")
+      const y=dateStart.format("YYYY-MM-DD")
       const h=dateStart.format("hh:mm:ss")
       const f=(y+"T"+h).toString();
       const f2=new Date(f)
@@ -199,8 +199,8 @@ if(isMounted)
       const h1=dateend.format("hh:mm:ss")
       const f1=(y1+"T"+h1).toString();
       const f3=new Date(f1)
-
-      const response =  await fetch('http://10.0.2.2:3001/insert_request', {
+      console.log(f2)
+        const response =  await fetch('http://10.0.2.2:3001/insert_request', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -219,20 +219,10 @@ if(isMounted)
       })
       const datay =  await response.json()
 
-  if (datay.user) { 
-   idReq=datay.id;
-   Alert.alert("📢Successfully sent","💫Yoy will get the reply as soon as possible")
-
-   
-   
-  } else
-
-  {
-    
-  }
-
-     
-       
+      if (datay.user) { 
+       idReq=datay.id;
+       Alert.alert("📢Successfully sent","💫Yoy will get the reply as soon as possible")
+      }
       const data = {
         employee_id: idEm,
         employee_first_name:first,
@@ -244,12 +234,11 @@ if(isMounted)
       
      await setDoc(doc(db,"notifications",uuidv4()),data);
 
-
-      
-
     }     
 return ( 
   <ScrollView style={{width:'100%'}}>
+        <HomeHeader navigation={navigation}/>
+
 <View >
 <Provider>
   <View style={{flexDirection:'row'}}>
@@ -290,12 +279,7 @@ return (
          onPress={showDatePicker}/>
   
 
-  <DateTimePickerModal
-        isVisible={isDatePickerVisible}
-        mode="date"
-        onConfirm={handleConfirm}
-        onCancel={hideDatePicker}
-      />
+  
        <TextInput
      
       label="Start date"
@@ -313,6 +297,12 @@ return (
        
        
 </View>
+<DateTimePickerModal
+        isVisible={isDatePickerVisible}
+        mode="date"
+        onConfirm={handleConfirm}
+        onCancel={hideDatePicker}
+      />
        
 <View style={{flexDirection:'row'}}>
 

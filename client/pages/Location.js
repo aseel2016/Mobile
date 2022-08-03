@@ -13,6 +13,7 @@ import {Button} from 'react-native-elements'
 import Axios from 'axios';
 import Icon4 from 'react-native-vector-icons/AntDesign';
 import MapView,{Marker,Circle} from 'react-native-maps';
+import { acc } from 'react-native-reanimated';
 
 let Mylocations=[];
 
@@ -50,6 +51,7 @@ const ModalPoup = ({visible, children}) => {
      </Modal>
    );
  };
+ let accessible;
 export default function Location({navigation}){
    const [emai,setEmail]=useState("");
    const [locations,setLocations]=useState([])
@@ -57,6 +59,7 @@ export default function Location({navigation}){
 const [show,setShow]=useState(false)
 const [longitude,setLangitude]=useState()
 const [latitude,setLatitude]=useState()
+const [employees,setEmployees]=useState([]);
 
    const getData = async () => {
       try {
@@ -104,36 +107,152 @@ const datay =  await response.json()
     }
     
     getData()
+
+    useEffect(()=>{
+      Axios.get('http://10.0.2.2:3001/getAllActive').then((response)=>{
+          setEmployees(response.data);
+    
+        })
+     
+    },[]);
     Mylocations=[];
 
     useEffect(()=>{
       Axios.get('http://10.0.2.2:3001/getLocation').then((response)=>{
         setLocations(response.data);}) })
+accessible? locations.map((val)=>{
+  
+     Mylocations.push({
+        "id":val._id,
+        'email':val.email,
+        "longitude":val.longitude,
+        "latitude":val.Latitude,
+        'date':val.Date,
 
-        locations.map((val)=>{
-         if(val.email===emai)
-          {
-            Mylocations.push({
-               "id":val._id,
-               "longitude":val.longitude,
-               "latitude":val.Latitude,
-               'date':val.Date,
+     })
+   
+ }): locations.map((val)=>{
+  if(val.email===emai)
+   {
+     Mylocations.push({
+        "id":val._id,
+        "longitude":val.longitude,
+        "latitude":val.Latitude,
+        'date':val.Date,
 
-            })
-          }
-        })
+     })
+   }
+ })
+       
    
       
   
 
-    
-  
+        employees.map((val)=>{
+          if(val.email===emai){
+            if(val.accessible==="No"){
+              accessible=false;
+        
+            }
+            else{
+              accessible=true;
+        
+            }
+        
+          }
+        }) 
+        accessible?
+        Mylocations.map((val)=>{
+          employees.map((valr)=>{
+            if(valr.email===val.email){
+              val.email=valr.firstName+" "+valr.lastName;
+            }
+          })
+        })
+        :null 
 
 return ( 
  
     <View >
     <HomeHeader navigation={navigation}/>
+    {accessible?
     <View>
+       <View>
+      
+      <View>
+    
+    <TouchableOpacity style={styles.container}  >
+    <Text  style={styles.text}> Name    </Text>
+                        <Text  style={styles.text}> Date </Text>
+
+            <Text  style={styles.text}>    Latitude</Text>
+            <Text style={styles.text}>Longitude </Text>
+           
+            </TouchableOpacity>
+            
+    {
+
+      Mylocations.map((val,key)=>{
+         const y=moment(val.date).utc().format("YYYY/MM/DD")
+         return ( <TouchableOpacity style={styles.container} onPress={
+            ()=>{
+               setShow(true)
+               setLangitude(val.longitude)
+               setLatitude(val.latitude)
+            }
+         }   >
+     <Text  style={styles.text2}>{val.email}  </Text>
+
+                        <Text  style={styles.text2}>{y}  </Text>
+
+            <Text key={val.id} style={styles.text2}>{val.latitude}  </Text>
+            <Text style={styles.text2}>{val.longitude} </Text>
+           
+            </TouchableOpacity>);
+      })
+    }
+    </View>
+   
+   
+{show &&  <View style={styles.mapPreview}>
+            
+
+        
+        <MapView style={{width:'100%',height:'100%'}} 
+        
+   
+        >
+             <Marker 
+     
+     coordinate={{ latitude : parseFloat(latitude) , longitude : parseFloat(longitude) }}>
+
+
+     </Marker>
+   
+
+    
+            </MapView>
+
+
+    
+
+  
+
+
+           </View>  }
+           
+  
+
+
+
+   
+           </View>
+          
+
+
+    </View>:
+    <View>
+       <View>
       
       <View>
     
@@ -201,6 +320,8 @@ return (
    
            </View>
           
+      </View>}
+   
            
           
     </View>
@@ -231,6 +352,14 @@ const styles = StyleSheet.create({
      
  
    },
+   text2:{
+    fontSize:15,
+    fontWeight:'bold',
+    margin:7,
+    
+    
+
+  },
    textjj:{
      fontSize:20,
      fontWeight:'bold',

@@ -30,6 +30,7 @@ const cookie =require( 'cookie');
 
 const Joi = require("joi");
 const Holidays = require('./models/Holiday');
+const Jobs = require('./models/Jobs');
 
 mongoose.connect('mongodb+srv://AA:aseelfrance2016@cluster0.ahlrcmp.mongodb.net/HrSystem?retryWrites=true&w=majority',{
 useNewUrlParser:true,
@@ -330,6 +331,8 @@ app.post('/login', async (req, res) => {
 		email: req.body.email,
     password:req.body.password,
     accessible:"Yes",
+    TerminationDate:null,
+
 	})
   
   if(user){
@@ -410,7 +413,7 @@ app.post('/accept-reject', async (req, res) => {
   const id =req.body.id;
   const sta=req.body.status;
   RequestOff.findOneAndUpdate(
-    {"emplyeeId":id}, 
+    {"_id":id}, 
     { 
         $set: {'StatusHR':sta}
     },
@@ -964,7 +967,61 @@ app.post("/updatePassword",async(req,res)=>{
     res.status(400).send("error Updating");
   }
    else{
-    res.status(200).send("Successfully done");   }
+    res.status(200).send("Successfully done"); 
+    }
+  });
+
+
+});
+
+app.post("/update_reopen",async(req,res)=>{
+  
+  console.log(req.body);
+  const e =req.body.job;
+ 
+
+  Jobs.findOneAndUpdate(
+    {"_id":e}, 
+
+    { $unset: { state: "" } },
+    {
+        returnNewDocument: true
+    }
+  , function( error, result){
+   if(error)
+  {
+    res.status(400).send("error Updating");
+  }
+   else{
+    res.status(200).send("Successfully done"); 
+    }
+  });
+
+
+});
+
+
+app.post("/update_reopen2",async(req,res)=>{
+  
+  console.log(req.body);
+  const e =req.body.job;
+ 
+
+  Jobs.findOneAndUpdate(
+    {"_id":e}, 
+
+    { $unset: { Applicants: "" } },
+    {
+        returnNewDocument: true
+    }
+  , function( error, result){
+   if(error)
+  {
+    res.status(400).send("error Updating");
+  }
+   else{
+    res.status(200).send("Successfully done"); 
+    }
   });
 
 
@@ -1465,7 +1522,31 @@ app.post('/signin', async (req, res) => {
 
 	
 })
+app.post('/getPhone', async (req, res) => {
+	console.log(req.body);
+  
+  
+  const user = await Applicants.findOne({
+		email: req.body.email,
+   
+	})
+  
+  if(user){
+   
+    res.status(200).json({ user: true ,phone:user.phoneNumber});
+    
+   
+  }
 
+	if (!user) {
+   
+    res.status(400).json({ user:false  });
+	}
+
+	
+
+	
+})
 {/** id:jobid,
           applicantNew:data,  */}
 
@@ -1506,7 +1587,8 @@ app.post('/signin', async (req, res) => {
             const user = await Employee.findOne({
               email: req.body.email,
               password:req.body.password,
-              accessible:"No",
+              TerminationDate:null,
+              
             })
             
             if(user){
@@ -1541,7 +1623,7 @@ app.post('/signin', async (req, res) => {
             console.log(decoded.email+"decodec");
             const email = decoded.email;
             const user = await Employee.findOne(
-              { email: email,accessible:"No", }
+              { email: email }
               )
               if(user){
                 res.status(200).json({ user: true ,email:email});
@@ -1706,6 +1788,99 @@ app.post('/signin', async (req, res) => {
             });
           });
           
+ 
+app.post('/update_applicant', async (req, res) => {
+  console.log(req.body);
+  const id=req.body.job;
+  const s =req.body.email;
+  const st =req.body.state;
+
+  Job.findOneAndUpdate(
+    {"_id":id ,"Applicants.email": s }, 
+
+    { 
+        $set: { "Applicants.$.status" :st }
+    },
+    {
+        returnNewDocument: true
+    }
+  , function( error, result){
+   if(error)
+  {
+    res.json({user:false});
+  }
+   else{
+    res.json({user:true});
+   }
+  });
+ 
+
+	
+}
+
+
+)
+
+
+app.post('/update_applicantAll', async (req, res) => {
+  console.log(req.body);
+  const id=req.body.job;
+
+  Job.findOneAndUpdate(
+    {"_id":id  }, 
+
+    { 
+        $set: { "Applicants.$[].status" :"Rejected" }
+    },
+    {
+        returnNewDocument: true
+    }
+  , function( error, result){
+   if(error)
+  {
+    res.json({user:false});
+  }
+   else{
+    res.json({user:true});
+   }
+  });
+ 
+
+	
+}
+
+
+)
+
+app.post('/update_stateFinsish', async (req, res) => {
+  console.log(req.body);
+  const id=req.body.job;
+
+  Job.findOneAndUpdate(
+    {"_id":id  }, 
+
+    { 
+        $set: {state:"Finished"}
+    },
+    {
+        returnNewDocument: true
+    }
+  , function( error, result){
+   if(error)
+  {
+    res.json({user:false});
+  }
+   else{
+    res.json({user:true});
+   }
+  });
+ 
+
+	
+}
+
+
+)
 app.listen(3001,()=>{
     console.log("server runing 3001");
 

@@ -8,6 +8,9 @@ email:{
     },
 password:{
     type:String,
+},
+phoneNumber:{
+    type:Number,
 }
 
 });

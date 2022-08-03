@@ -181,7 +181,7 @@ const datay =  await response.json()
 
        }
        else{
-         navigation.navigate("Signin")
+         
        }
      } catch(e) {
        // error reading value

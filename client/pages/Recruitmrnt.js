@@ -74,17 +74,23 @@ const [jobid,setJobid]=useState("")
   
   myJobs=[];
      useEffect(()=>{
-      Axios.get('http://10.0.2.2:3001/getAllActive').then((response)=>{
+      let isMounted=true;
+      if(isMounted)
+     { Axios.get('http://10.0.2.2:3001/getAllActive').then((response)=>{
           setEmployees(response.data);
     
-        })
+        })}
+        return () => { isMounted = false }
      
     },[]);
     useEffect(()=>{
-        Axios.get('http://10.0.2.2:3001/getAlljobs').then((response)=>{
+      let isMounted=true
+      if(isMounted)
+       { Axios.get('http://10.0.2.2:3001/getAlljobs').then((response)=>{
             setJobs(response.data);
       
-          })
+          })}
+          return () => { isMounted = false }
        
       },[]);
   
@@ -98,7 +104,7 @@ const [jobid,setJobid]=useState("")
         }
         })
         jobs.map((val)=>{
-            if(val.manager===nameMe){
+            if(val.manager===nameMe && val.state!=="Finished"){
                 myJobs.push(val);
             }
         })
@@ -144,10 +150,7 @@ return (
  <RenderHtml
      contentWidth={width}
       source={{
-        
-        
         html: val.Description
-     
       }}/>
 <View style={{flexDirection:"row", flexWrap: 'wrap'}}>      
           {

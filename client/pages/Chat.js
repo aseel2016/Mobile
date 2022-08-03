@@ -83,10 +83,16 @@ const datay =  await response.json()
    
    getData()
    useEffect(()=>{
-    Axios.get('http://10.0.2.2:3001/getAllActive').then((response)=>{
+    let isMounted=true;
+    if(isMounted)
+
+    {Axios.get('http://10.0.2.2:3001/getAllActive').then((response)=>{
         setEmployees(response.data);
   
-      })
+      })}
+
+      return () => { isMounted = false }
+
    
   },[]);
 
@@ -100,11 +106,15 @@ employees.map((val)=>{
   })
   
   useEffect(() => {
-    socket.current.emit("addUser", idMe);
+    let isMounted=true;
+    if(isMounted)
+   { socket.current.emit("addUser", idMe);
     socket.current.on("getUsers", (users) => {
    setOnlineUsers(users);
 
-    });
+    });}
+    return () => { isMounted = false }
+
 
     
   }, [idMe]);

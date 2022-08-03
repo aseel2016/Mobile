@@ -31,6 +31,8 @@ let extraw;
 let policyAll=[];
 let resultFinal=[];
 let types=[];
+
+let accessible;
 const ModalPoup = ({visible, children}) => {
    const [showModal, setShowModal] = React.useState(visible);
    const scaleValue = React.useRef(new Animated.Value(0)).current;
@@ -76,6 +78,8 @@ export default function TimeoffHistory({navigation}){
 const [desc,setDes]=useState("");
    const [start,setStart]=useState("");
    const [end,setEnd]=useState("");
+   const [durationf,setDuration]=useState("");
+
    const [Description,setDescription]=useState("");
    const [datestart, setDatestart] = useState(new Date())
    const [dateend, setDateend] = useState(new Date())
@@ -87,34 +91,6 @@ const [desc,setDes]=useState("");
 
 
    const[totalDays,setTotaldays]=useState([]);
-
-   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-   const [isDatePickerVisible2, setDatePickerVisibility2] = useState(false);
-
-   const showDatePicker = () => {
-     setDatePickerVisibility(true);
-   };
- 
-   const hideDatePicker = () => {
-     setDatePickerVisibility(false);
-   };
- 
-   const handleConfirm = (date) => {
-     console.warn("A date has been picked: ", date);
-     hideDatePicker();
-   };
-   const showDatePicker2 = () => {
-    setDatePickerVisibility2(true);
-  };
-
-  const hideDatePicker2 = () => {
-    setDatePickerVisibility2(false);
-  };
-
-  const handleConfirm2 = (date) => {
-    console.warn("A date has been picked: ", date);
-    hideDatePicker2();
-  };
 
 
 
@@ -169,7 +145,7 @@ const datay =  await response.json()
     useEffect(()=>{
       
 
-     Axios.get('http://10.0.2.2:3001/getAll').then((response)=>{
+     Axios.get('http://10.0.2.2:3001/getAllActive').then((response)=>{
             setEmployees(response.data);
       
           })
@@ -190,6 +166,19 @@ const datay =  await response.json()
          
          }
         })
+        employees.map((val)=>{
+          if(val.email===emai){
+            if(val.accessible==="No"){
+              accessible=false;
+        
+            }
+            else{
+              accessible=true;
+        
+            }
+        
+          }
+        })
 
         useEffect(()=>{
          Axios.get('http://10.0.2.2:3001/read').then((response)=>{
@@ -199,173 +188,281 @@ const datay =  await response.json()
       })
        },[requests])
        requestOffEm=[];
-
-       requests.map((val)=>{
-         if(val.emplyeeId===idEm){
-         let ss= moment(val.Starting).utc().format('YYYY/MM/DD');
-         let ee= moment(val.Ending).utc().format('YYYY/MM/DD');
-         const y=moment.preciseDiff(ss,ee,true)
-         const u=y['days']
-          let datayy={
-            'key':val._id,
-            'id':val._id,
-             'Type':val.Type,
-             'Description':val.Description,
-             'Starting':ss,
-             'Ending':ee,
-             'duration':u+" days",
-             'StatusHR':val.StatusHR,
-     
-     
-         
-      };
-     
-      requestOffEm.push(datayy);
-         }
-       }
-        );
-
-        policyAll=[];
-        resultFinal=[];
-        types=[];
-          useEffect(()=>{
-           
-            
-          Axios.get('http://10.0.2.2:3001/policy').then((response)=>{
-            setTotaldays(response.data);
-           
-          
-          })})
-
-          totalDays.map((val)=>{
-            let u={
-              'key':val._id,
-              'type':val.type,
-              'state':val.state,
-              'total':0,
-            }
-            policyAll.push(u);
-            types.push(val.type);
-
-          })
+{accessible?
+  requests.map((val)=>{
+    
+    let ss= moment(val.Starting).utc().format('YYYY/MM/DD');
+    let ee= moment(val.Ending).utc().format('YYYY/MM/DD');
+    const y=moment.preciseDiff(ss,ee,true)
+    const u=y['days']
+     let datayy={
+       'key':val._id,
+       'id':val._id,
+       'Emid':val.emplyeeId,
+        'Type':val.Type,
+        'Description':val.Description,
+        'Starting':ss,
+        'Ending':ee,
+        'duration':u+" days",
+        'StatusHR':val.StatusHR,
 
 
-         
- 
-            requests.map((val)=>{
-              
-              if (val.emplyeeId==idEm && val.StatusHR==='accepted' )
-            {  policyAll.map((valueEm)=>{
-              if(valueEm.type===val.Type){
-                const s=val.Starting;
-              const e=val.Ending;
-          
-              const now=moment();
-              const ss=moment(s);
-              const ee=moment(e);
-              r=moment.preciseDiff(ss,ee,true);
-              if(valueEm.state==='month'){
-                if((now.month()==ss.month()) &&   (now.year()==ss.year()) ){
-             
-                  valueEm.total=valueEm.total+r['days'];
-                }
+    
+ };
 
-              }
-              else if(valueEm.state==='year'){
-                if(  now.year()==ss.year() ){
-               
-                  valueEm.total=valueEm.total+r['days'];
-                    
-               }
-              
-              
-               }
-              
-            
-            
-           
-            } })
-          }
-        })
-
-        policyAll.map((val)=>{
-          totalDays.map((val2)=>{
-            if(val.type===val2.type){
-              let u={
-                "key":val2._id,
-                "type":val.type,
-                "total":val2.totaldays,
-                "taken":val.total,
-              }
-              resultFinal.push(u);
-            }
+ requestOffEm.push(datayy);
+    
+  }
+   )
+  :
+  requests.map((val)=>{
+  if(val.emplyeeId===idEm){
+  let ss= moment(val.Starting).utc().format('YYYY/MM/DD');
+  let ee= moment(val.Ending).utc().format('YYYY/MM/DD');
+  const y=moment.preciseDiff(ss,ee,true)
+  const u=y['days']
+   let datayy={
+     'key':val._id,
+     'id':val._id,
+      'Type':val.Type,
+      'Description':val.Description,
+      'Starting':ss,
+      'Ending':ee,
+      'duration':u+" days",
+      'StatusHR':val.StatusHR,
 
 
-          })
+  
+};
 
-        })
-
-    async function handlerequest(){
-      Alert.alert(type+desc+datestart+dateend)
-      const response =  await fetch('http://10.0.2.2:3001/insert_request', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          
-         id:idEm,
-         type:type,
-         description:desc,
-         start:new Date(datestart),
-         end:new Date(dateend),
-         
-          
-        }),
-      
-      })
-     
-      Axios.get('http://10.0.2.2:3001/read').then((response)=>{
-        setRequests2(response.data);})
-        requests2.map((val)=>{
-          if(val.emplyeeId===idEm
-            && val.Type===type && 
-            val.Ending===dateend &&
-            val.Statring===datestart && 
-            val.Description===desc
-            )
-            {
-              idReq=val._id;
-            }
-
-        })
-
+requestOffEm.push(datayy);
+  }
+}
+ );}
        
-      const data = {
-        employee_id: idEm,
-        employee_first_name:first,
-        employee_last_name:last,
-        message:"sends you time off request",
-        Rec_email:"aseelbustami16@gmail.com",
-        Request_id:idReq,
-      };
-      
-     await setDoc(doc(db,"notifications",uuidv4()),data);
+
+    accessible?
+    requestOffEm.map((val)=>{
+  employees.map((valr)=>{
+    if(valr._id===val.Emid){
+      val.Emid=valr.firstName+" "+valr.lastName;
+    }
+  })
+})
+:null
+
+policyAll=[];
+resultFinal=[];
+types=[];
+  useEffect(()=>{
+   
+    
+  Axios.get('http://10.0.2.2:3001/policy').then((response)=>{
+    setTotaldays(response.data);
+   
+  
+  })})
+
+  totalDays.map((val)=>{
+    let u={
+      'key':val._id,
+      'type':val.type,
+      'state':val.state,
+      'total':0,
+    }
+    policyAll.push(u);
+    types.push(val.type);
+
+  })
+  requests.map((val)=>{
+              
+    if (val.emplyeeId==idEm && val.StatusHR==='accepted' )
+  {  policyAll.map((valueEm)=>{
+    if(valueEm.type===val.Type){
+      const s=val.Starting;
+    const e=val.Ending;
+
+    const now=moment();
+    const ss=moment(s);
+    const ee=moment(e);
+    let r=moment.preciseDiff(ss,ee,true);
+    if(valueEm.state==='month'){
+      if((now.month()==ss.month()) &&   (now.year()==ss.year()) ){
+   
+        valueEm.total=valueEm.total+r['days'];
+      }
+
+    }
+    else if(valueEm.state==='year'){
+      if(  now.year()==ss.year() ){
+     
+        valueEm.total=valueEm.total+r['days'];
+          
+     }
+    
+    
+     }
+    
+  
+  
+ 
+  } })
+}
+})
+
+policyAll.map((val)=>{
+totalDays.map((val2)=>{
+  if(val.type===val2.type){
+    let u={
+      "key":val2._id,
+      "type":val.type,
+      "total":val2.totaldays,
+      "taken":val.total,
+    }
+    resultFinal.push(u);
+  }
 
 
-      
+})
 
-    }     
+})
+
 return ( 
   <ScrollView style={{width:'100%'}}>
 <View >
        <HomeHeader navigation={navigation}/>
-       <View style={{margin:20}}>
-       <Button title="➕Send time off request" 
-       onPress={()=>navigation.navigate("RequestOFF")}
-       titleStyle={{fontSize:20}}
-       buttonStyle={{backgroundColor:colors.buttons,borderRadius:100}}/>
+       {accessible?
+       <View>
+<View>
+
+       
+
+
+<Text style={{backgroundColor:'#D8D5D5',
+fontSize:20,fontWeight:'800',padding:20,color:colors.buttons}}>History of Time off Requests</Text>
+<TouchableOpacity style={styles.container}  >
+
+<Text style={styles.text}> Name       </Text>
+
+    <Text style={styles.text}>   Type   </Text>
+    <Text style={styles.text}>    Status </Text>
+
+   
+   
+    </TouchableOpacity>
+{
+  requestOffEm.map((val)=>{
+     let j="";
+     let t=val.Type;
+     if(t==="Work from Home"){
+      t="WFH";
+     }
+
+     if(val.StatusHR==="rejected"){
+       
+       j= <Text style={
+           {backgroundColor:'red',
+         fontSize:20,
+        fontWeight:'bold',
+        marginLeft:20,
+       
+        marginTop:30,
+        
+
+    }}>Rejected</Text>
+
+     }
+     else if (val.StatusHR==="accepted"){
+       j= <Text style={
+           {backgroundColor:'green',
+         fontSize:20,
+        fontWeight:'bold',
+        marginLeft:20,
+        
+    }}>Accepted</Text>
+
+     }
+     else{
+       j= <Text style={
+           {backgroundColor:'blue',
+         fontSize:20,
+        fontWeight:'bold',
+        marginLeft:20,
+        
+       
+    }}>Waiting </Text>
+
+     }
+     return <View key={val.key}>
+        
+        
+        <TouchableOpacity style={styles.container} onPress={()=>{
+           
+           setShow(true)
+           setStart(val.Starting)
+           setDuration( val.duration)
+           setEnd(val.Ending)
+           setDescription(val.Description)
+
+           
+           }}  >
+    <Text style={styles.text2}> {val.Emid}</Text>
+    <Text style={styles.text2}>{t}</Text>
+    <Text style={styles.text2}>{j} </Text>
+    
+
+
+   
+   
+    </TouchableOpacity>
+
+
+     </View>
+
+  })
+
+}
+ { show && <ModalPoup visible={show} >
+ <View style={{alignItems: 'center'}}>
+   <View style={styles.header}>
+    <Icon4  name='close'size={25} onPress={()=>setShow(false)}/>
+   </View>
+ </View>
+
+
+ <View style={{flexDirection:'column'}}>
+ <Text style={styles.text}>Duration: {durationf}</Text>
+
+    <Text style={styles.text}>Start Date: {start} </Text>
+    <Text style={styles.text}> End Date: {end}</Text>
+    <Text style={styles.text}>Description: {Description}</Text>
+    </View>
+   
+
+   
+
+
+
+
+   
+ 
+</ModalPoup>}
+
+
+
+
+
+
+
+
+
+</View>        
+
+
        </View>
+       :
+       <View>
+        
        
 
        {
@@ -555,6 +652,8 @@ return (
        
 
       </View>
+      </View>}
+      
     
     </View>
   </ScrollView>
@@ -583,6 +682,14 @@ const styles = StyleSheet.create({
      
  
    },
+   text2:{
+    fontSize:16,
+    fontWeight:'bold',
+    margin:15,
+    marginLeft:20,
+    
+
+  },
    textjj:{
      fontSize:20,
      fontWeight:'bold',
