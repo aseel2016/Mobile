@@ -1,5 +1,5 @@
 import React,{useState,useEffect,useRef} from 'react';
-import { StyleSheet,TouchableOpacity,Modal,Animated, Text, View,Alert,Dimensions,TextInput, FlatList} from 'react-native';
+import { StyleSheet,TouchableOpacity,Modal,Animated,ScrollView, Text, View,Alert,Dimensions, FlatList} from 'react-native';
 import {colors} from '../global/styles'
 import HomeHeader from '../components/HomeHeader';
 import AsyncStorage from '@react-native-async-storage/async-storage';  
@@ -11,7 +11,10 @@ import Icon3 from 'react-native-vector-icons/Feather';
 import Icon4 from 'react-native-vector-icons/AntDesign';
 import { v4 as uuidv4 } from 'uuid';
 import "react-native-get-random-values";
-import {Button} from 'react-native-elements'
+import { Searchbar } from 'react-native-paper';
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { Card,Avatar,IconButton } from 'react-native-paper';
+import {  Portal,Snackbar ,TextInput,Checkbox  ,  Button, Provider } from 'react-native-paper';
 
 import Axios from 'axios';
 let clocksAll=[];
@@ -24,7 +27,13 @@ const ModalPoup = ({visible, children}) => {
   const scaleValue = React.useRef(new Animated.Value(0)).current;
  
   React.useEffect(() => {
-    toggleModal();
+
+    let isMounted=true;
+    if(isMounted)
+   { toggleModal();}
+   return () => { isMounted = false }
+
+
   }, [visible]);
   const toggleModal = () => {
     if (visible) {
@@ -63,28 +72,37 @@ const [date,setDate]=useState();
    const [show2,setShow2]=useState(false);
    const[cohsen,setChosenName]=useState("")
 
+   const [searchQuery, setSearchQuery] = React.useState('');
+
+   const onChangeSearch = query => setSearchQuery(query);
+   const [dateStart, setDatestart] =useState("");
+
+   
+   const onDismissSnackBar = () => setVisible(false);
+  
+  
+  
+     const[totalDays,setTotaldays]=useState([]);
+  
+     const [isDatePickerVisible2, setDatePickerVisibility2] = useState(false);
+  
+  
    
    useEffect(()=>{
+    let isMounted=true;
+    if(isMounted){
     Axios.get('http://10.0.2.2:3001/getAllActive').then((response)=>{
         setEmployees(response.data);
   
       })
-   
+    }
+    return () => { isMounted = false }
+
+
   },[]);
-   const showDatePicker = () => {
-    setDatePickerVisibility(true);
-  };
+  
 
-  const hideDatePicker = () => {
-    setDatePickerVisibility(false);
-  };
 
-  const handleConfirm = (date) => {
-    const y=moment(date)
-    setDatestart(y);
-
-    hideDatePicker();
-  };
   const showDatePicker2 = () => {
    setDatePickerVisibility2(true);
  };
@@ -94,8 +112,7 @@ const [date,setDate]=useState();
  };
 
  const handleConfirm2 = (date) => {
-   const y=moment(date)
-   setDateend(y)
+  setDatestart(moment(date).format("YYYY-MM-DD"))
    hideDatePicker2();
  };
 
@@ -162,7 +179,7 @@ useEffect(()=>{
 
                     if(val.Clockout!=null){
               let t= moment(val.Clockin).utc().format('hh:mm:ss');
-              let x= moment(val.Clockin).utc().format('YYYY/MM/DD');
+              let x= moment(val.Clockin).utc().format('YYYY-MM-DD');
                
     
     
@@ -173,11 +190,12 @@ useEffect(()=>{
 
               const hours=r['hours']+"H: "+r['minutes']+"M: "+r['seconds']+"S"
               let tt= moment(val.Clockout).utc().format('hh:mm:ss');
-              let xx= moment(val.Clockout).utc().format('YYYY/MM/DD');
+              let xx= moment(val.Clockout).utc().format('YYYY-MM-DD');
 
               let data={
                 'id':val._id,
                 'email':val.email,
+                'location':val.location,
                 
                 
                 'clockintime':t,
@@ -202,7 +220,7 @@ useEffect(()=>{
                   if(val.email===emai){
                     if(val.Clockout!=null){
               let t= moment(val.Clockin).utc().format('hh:mm:ss');
-              let x= moment(val.Clockin).utc().format('YYYY/MM/DD');
+              let x= moment(val.Clockin).utc().format('YYYY-MM-DD');
                
     
     
@@ -213,11 +231,11 @@ useEffect(()=>{
 
               const hours=r['hours']+"H: "+r['minutes']+"M: "+r['seconds']+"S"
               let tt= moment(val.Clockout).utc().format('hh:mm:ss');
-              let xx= moment(val.Clockout).utc().format('YYYY/MM/DD');
+              let xx= moment(val.Clockout).utc().format('YYYY-MM-DD');
 
               let data={
                 'id':val._id,
-                
+                'location':val.location,
                 
                 'clockintime':t,
                 'clockindate':x,
@@ -425,15 +443,51 @@ clocksperday.map((val)=>{
 })
 :null
 
-function handlepress(){
-Alert.alert("date")
-}
+let records=[];
+const myData = [].concat(clocksperday)
+    .sort((a, b) => a.date > b.date ? -1 : 1)
+
+
+ async function handlepressed (){
+Alert.alert("gg")
+ }
 return ( 
+  <ScrollView style={{width:'100%'}}>
 <View >
        <HomeHeader navigation={navigation}/>
 
        {accessible?
        <View>
+
+<View style={{flexDirection:'row'}}>
+
+<IconButton mode="contained"
+  icon="calendar"
+  size={30}
+  style={{marginTop:20}}
+       onPress={showDatePicker2}
+       />
+
+<TextInput
+   
+   label="choose Date ..."
+   value={dateStart}
+   onChangeText={(text)=>setDatestart(text)}
+  
+   style={{width:330,marginVertical:10}} 
+   
+  
+ />
+
+   
+</View>
+
+     <DateTimePickerModal
+      isVisible={isDatePickerVisible2}
+      mode="date"
+      onConfirm={handleConfirm2}
+      onCancel={hideDatePicker2}
+    />
         <TouchableOpacity style={styles.container2} 
        >
            
@@ -448,18 +502,33 @@ return (
 
            
       {
-       clocksperday.map((val,key)=>{
+       myData.map((val,key)=>{
          let icon;
+         const y=val.total.split(" ");
+         const o=y[0].split("H")  
+           const integerHour= parseInt(o[0]);
+         
+         
+                  
+         
+                  if(integerHour ===8){
+                   icon=<Icon4  style={styles.textIcon} name="checkcircle" color="green" size={30}/>
+                 }
+                  else if(integerHour >8){
+         
+                   icon=<Icon4  style={styles.textIcon} name="checkcircle" color="green" size={30}/>
+         
+         
+         
+                  }
+                  else{
+                   icon=<Icon2  style={styles.textIcon} name="error" color="red" size={30}/>
+         
+                  }
 
-         if(val.total>="8H: 0M: 0S"){
-           icon=<Icon4  style={{margin:5}} name="checkcircle" color="green" size={28}/>
-         }
-         else{
-           icon=<Icon2  style={{margin:5}} name="error" color="red" size={28}/>
-
-         }
-
-         return  <View key={uuidv4()}  >
+                  if(dateStart!==""){
+                    if(val.date===dateStart){
+                      return  <View key={uuidv4()}  >
            <TouchableOpacity
           
            style={styles.container2}
@@ -481,6 +550,36 @@ return (
            </TouchableOpacity>
            
            </View>
+                    }
+                    
+                  }
+                  else{
+                    return  <View key={uuidv4()}  >
+           <TouchableOpacity
+          
+           style={styles.container2}
+           onPress={()=>{
+            setDate(val.date)
+            employees.map((valut)=>{
+              if(valut.firstName+" "+valut.lastName===val.email){
+                setChosenName(valut.email)
+              }
+            })
+            
+            setShow(true)}} 
+           
+            >
+           {icon}
+           <Text style={styles.text2}>{val.email}   </Text>
+           <Text style={styles.text2}>{val.date}   </Text>
+           <Text style={styles.text2}>{val.total}  </Text>
+           </TouchableOpacity>
+           
+           </View>
+
+                  }
+
+         
        })
       }
        { show && <ModalPoup visible={show}>
@@ -497,13 +596,27 @@ return (
              const y=val.clockindate
              if(y===date && cohsen===val.email ){
    
-             return  (<View style={styles.container} >
+             return  (<View style={styles.container} key={uuidv4()} >
      <Icon4 name='clockcircleo' size={25} style={{marginLeft:10,marginTop:15}}/>
 
 
                <Text style={styles.textjj}>
                  
                  {val.clockintime}---{val.clockouttime}</Text>
+
+                 <Button mode="contained" 
+  onPress={()=>{
+    navigation.navigate("Location",{location:val.location});
+
+  }}
+  style={{margin:10}}
+  >
+
+ 
+ <Icon2 name='location-pin' size={25}
+ />
+
+</Button>
               
                </View>);
                }
@@ -522,6 +635,40 @@ return (
        </View>
        :
        <View>
+        <View style={{flexDirection:'row'}}>
+
+<IconButton mode="contained"
+  icon="calendar"
+  size={30}
+  style={{marginTop:20}}
+       onPress={showDatePicker2}
+       />
+
+<TextInput
+   
+   label="choose Date ..."
+   value={dateStart}
+   onChangeText={(text)=>setDatestart(text)}
+  
+   style={{width:330,marginVertical:10}} 
+   
+  
+ />
+
+   
+</View>
+
+     <DateTimePickerModal
+      isVisible={isDatePickerVisible2}
+      mode="date"
+      onConfirm={handleConfirm2}
+      onCancel={hideDatePicker2}
+    />
+
+
+
+
+
          <TouchableOpacity style={styles.container}  >
            
            <Text style={styles.text}>         Date          </Text>
@@ -532,29 +679,66 @@ return (
       
       
       {
-       clocksperday.map((val,key)=>{
+       myData.map((val,key)=>{
          let icon;
+         const y=val.total.split(" ");
+const o=y[0].split("H")  
+  const integerHour= parseInt(o[0]);
 
-         if(val.total>="8H: 0M: 0S"){
-           icon=<Icon4  style={styles.textIcon} name="checkcircle" color="green" size={30}/>
+
+         
+
+         if(integerHour ===8){
+          icon=<Icon4  style={styles.textIcon} name="checkcircle" color="green" size={30}/>
+        }
+         else if(integerHour >8){
+
+          icon=<Icon4  style={styles.textIcon} name="checkcircle" color="green" size={30}/>
+
+
+
          }
          else{
-           icon=<Icon2  style={styles.textIcon} name="error" color="red" size={30}/>
+          icon=<Icon2  style={styles.textIcon} name="error" color="red" size={30}/>
 
          }
 
-         return  <View key={uuidv4()}  >
-           <TouchableOpacity style={styles.container}  onPress={()=>{
-             setDate(val.date)
-             
-             setShow(true)}}>
-           {icon}
-           <Text style={styles.text}>{val.date}   </Text>
-           <Text style={styles.text}>{val.total}  </Text>
-           <Icon3  style={styles.textIcon2} name='arrow-right' />
-           </TouchableOpacity>
-           
-           </View>
+         if(dateStart!==""){
+          if(val.date===dateStart){
+               return  <View key={uuidv4()}  >
+          <TouchableOpacity style={styles.container}  
+          onPress={()=>{
+            setDate(val.date)             
+            setShow(true)}}>
+          {icon}
+          <Text style={styles.text}>{val.date}   </Text>
+          <Text style={styles.text}>{val.total}  </Text>
+          <Icon3  style={styles.textIcon2} name='arrow-right' />
+          </TouchableOpacity>
+          
+          </View>
+
+          }
+
+         }
+         else{
+          return  <View key={uuidv4()}  >
+          <TouchableOpacity style={styles.container}  
+          onPress={()=>{
+            setDate(val.date)             
+            setShow(true)}}>
+          {icon}
+          <Text style={styles.text}>{val.date}   </Text>
+          <Text style={styles.text}>{val.total}  </Text>
+          <Icon3  style={styles.textIcon2} name='arrow-right' />
+          </TouchableOpacity>
+          
+          </View>
+
+
+         }
+
+        
        })
       }
      
@@ -571,20 +755,39 @@ return (
           {
            clocksAll.map((val,key)=>{
              const y=val.clockindate
+             
              if(y===date ){
    
-             return  (<View style={styles.container} >
+             return  (
+             
+             <View style={styles.container} key={uuidv4()}>
      <Icon4 name='clockcircleo' size={25} style={{marginLeft:10,marginTop:15}}/>
 
 
                <Text style={styles.textjj}>
                  
                  {val.clockintime}---{val.clockouttime}</Text>
+
+
+  <Button mode="contained" 
+  onPress={()=>{
+    navigation.navigate("Location",{location:val.location});
+
+  }}
+  style={{margin:10}}
+  >
+
+ 
+ <Icon2 name='location-pin' size={25}
+ />
+
+</Button>
               
                </View>);
                }
            })
           }
+
          
 
 
@@ -604,6 +807,7 @@ return (
 
 
     </View>
+    </ScrollView>
    );
 }
 
@@ -623,7 +827,7 @@ return (
  
   },
   text2:{
-    fontSize:17,
+    fontSize:16,
     fontWeight:'bold',
     margin:5,
 
@@ -700,7 +904,7 @@ return (
     alignItems: 'center',
   },
   modalContainer: {
-    width: '80%',
+    width: '100%',
     backgroundColor: 'white',
     paddingHorizontal: 20,
     paddingVertical: 30,

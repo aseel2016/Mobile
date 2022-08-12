@@ -6,16 +6,27 @@ import Header from '../../components/Header';
 import * as Animatable from 'react-native-animatable';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon2 from 'react-native-vector-icons/MaterialIcons';
-import {Button} from 'react-native-elements'
+import {Button, colors} from 'react-native-elements'
 import { parameters } from '../../global/styles';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';  
+import { Modal, Portal, Provider } from 'react-native-paper';
+import { v4 as uuidv4 } from 'uuid';
+import "react-native-get-random-values";
+
+import email from 'react-native-email'
 
 export default function Login({navigation}){
 const [emai,setEmail]=useState("");
+const [emailpass,setEmailPass]=useState("");
+
 const [pass,setPass]=useState("");
 const[open,setOpen]=useState(false);
 const[open2,setOpen2]=useState(true);
+const [visible, setVisible] = React.useState(false);
+const containerStyle = {backgroundColor: 'white', padding: 20};
+  const showModal = () => setVisible(true);
+  const hideModal = () => setVisible(false);
 const handllremote=()=>{
   setOpen(!open)
   setOpen2(!open2)
@@ -81,9 +92,35 @@ async function  handlesign(event){
    
 }
 }
+async function handleforget(){
+  //Alert.alert(emailpass)
+  const y=uuidv4();
+  
+  const response = await fetch('http://10.0.2.2:3001/resetpassword', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      
+      email:emailpass,
+      password:y,
+      
+    }),
+
+  })
+  
+
+
+}
+
+
+
 
 return ( 
+  
 <View style={styles.container}>
+  
            <Header title="Login to your Account" />
           <View>
              <TextInput
@@ -117,6 +154,11 @@ return (
                </Animatable.View>
 
                </View>
+
+               <Text
+               style={{margin:20,fontSize:18,color:'grey',textDecorationLine:'underline'}}
+               onPress={showModal}
+               >Forgot password ?</Text>
              
                <View style={{margin:30,padding:20}}>
                <Button
@@ -130,13 +172,36 @@ return (
 
  
 />
-              
+
                </View>
+               <Provider>
+      <Portal>
+        <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={containerStyle}>
+          <Text style={{fontSize:20,fontWeight:'700'}}>Please enter your email to receive your new password</Text>
+          <TextInput
+             placeholder='Enter your Email'
+             style={styles.TextInput3}
+             onChangeText={(Text)=>{setEmailPass(Text)}}
+             value={emailpass}
+
+             />
+
+<Button
+              onPress={handleforget}
+  
+  title="Send new password"
+  buttonStyle={parameters.styledButton}
+  titleStyle={parameters.buttonTitle}
+  />
+        </Modal>
+      </Portal>
+      </Provider>
                
         
     
 
     </View>
+    
    );
 }
 
@@ -152,6 +217,16 @@ const styles = StyleSheet.create({
     fontSize:20,
     borderRadius:15,
     marginTop:80,
+    padding:10,
+    paddingLeft:15,
+  },
+  TextInput3:{
+    borderWidth:1,
+    borderColor:"grey",
+    marginVertical:20,
+    fontSize:20,
+    borderRadius:15,
+    
     padding:10,
     paddingLeft:15,
   },

@@ -7,6 +7,8 @@ const event=require('./models/event')
 const Salary=require('./models/payments')
 const Job=require('./models/Jobs')
 const Applicants=require('./models/Applicant')
+require('dotenv').config()
+const nodemailer = require("nodemailer");
 
 const Conversation=require('./models/Conversation')
 const Message=require('./models/Message')
@@ -1644,8 +1646,9 @@ app.post('/getPhone', async (req, res) => {
             console.log(req.body);
             const t =req.body.email;
             const d =req.body.Clockin;
+
          
-            const doc = new Clock({ Clockin:d,email:t })
+            const doc = new Clock(req.body)
            
             doc.save((err, doc) => {
               if (err) {
@@ -1879,6 +1882,145 @@ app.post('/update_stateFinsish', async (req, res) => {
 	
 }
 
+
+)
+
+app.post('/find_clock', async (req, res) => {
+  console.log(req.body);
+  const email =req.body.email;
+  const user = await Clock.findOne(
+    { email:email,Clockout:null }
+    )
+    if(user){
+      res.status(200).json({ user: true ,
+        clockin:user.Clockin,
+        id:user._id,
+        
+        });
+    }
+if(!user){
+  res.status(400).json({ user:false  });
+ 
+  
+ 
+
+	
+}
+}
+);
+
+app.post("/update_location",async(req,res)=>{
+
+  console.log(req.body);
+  const loc=req.body.location;
+
+ 
+  Clock.findOneAndUpdate(
+    {"Clockout":null}, 
+
+    { 
+        $push: {location:loc}
+    },
+    {
+        returnNewDocument: true
+    }
+  , function( error, result){
+   if(error)
+  {
+    res.json({user:false});
+  }
+   else{
+    res.json({user:true});
+   }
+  });
+ 
+
+
+});
+
+app.post('/resetpassword', async (req, res) => {
+	console.log(req.body);
+  const e=req.body.email;
+  const p=req.body.password;
+
+  let transporter = nodemailer.createTransport({
+   
+    service:"gmail",
+    secure:false,
+    host:'smtp.gmail.com',
+      auth: {
+      user: "aseelbustami16@gmail.com", // generated ethereal user
+      pass: "ezqsrrqxjsdyahae", // generated ethereal password
+    },
+  });
+
+  // send mail with defined transport object
+  let info = await transporter.sendMail({
+    from: "aseelbustami16@gmail.com", // sender address
+    to: e, // list of receivers
+    subject: "Reset password ✔", // Subject line
+    text: "your new password is "+p, // plain text body
+    html: "<b>your new password is "+p+"</b>", // html body
+  });
+
+  console.log("Message sent: %s", info.messageId);
+
+  
+  Employee.findOneAndUpdate(
+    {"email":e}, 
+
+    { 
+        $set: {'password':p}
+    },
+    {     
+
+
+        returnNewDocument: true
+    }
+  , function( error, result){
+   if(error)
+  {
+    res.json({user:false});
+  }
+   else{
+    res.json({user:true});
+   }
+  });
+ 
+
+
+	
+
+	
+}
+
+)
+
+app.post('/checkPassword', async (req, res) => {
+  console.log(req.body);
+  
+  const user = await Employee.findOne({
+		email: req.body.email,
+    password:req.body.password,
+    TerminationDate:null,
+
+	})
+  
+  if(user){
+  
+    res.status(200).json({ user: true});
+    
+   
+  }
+
+	if (!user) {
+   
+    res.status(400).json({ user:false  });
+	}
+
+
+	
+}
 
 )
 app.listen(3001,()=>{

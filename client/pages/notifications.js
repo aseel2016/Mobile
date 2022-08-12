@@ -222,14 +222,14 @@ employees.map((val)=>{
             <View>
               
                 {accessible? <View style={{flexDirection:'row'}}>
-                  <Text style={styles.title} numberOfLines={1}>{data.item.name}
+                  <Text style={styles.title} >{data.item.name}
                   </Text> 
-                  <Text style={styles.title} numberOfLines={1}> {data.item.title}
+                  <Text style={styles.title} > {data.item.title}
                   </Text> 
                   
                   </View>
                 :
-                <View><Text style={styles.title} numberOfLines={1}> {data.item.title}</Text></View>
+                <View><Text style={styles.title} > {data.item.title}</Text></View>
                 }
                 
               
@@ -403,8 +403,8 @@ const renderHiddenItem = (data, rowMap) => {
     rowFront: {
       backgroundColor: '#FFF',
       borderRadius: 5,
-      height: 60,
-      margin: 5,
+     
+      margin: 10,
       marginBottom: 15,
       shadowColor: '#999',
       shadowOffset: {width: 0, height: 1},
@@ -415,9 +415,9 @@ const renderHiddenItem = (data, rowMap) => {
     rowFrontVisible: {
       backgroundColor: '#FFF',
       borderRadius: 5,
-      height: 60,
+      height: 70,
       padding: 10,
-      marginBottom: 15,
+      marginBottom: 20,
     },
     rowBack: {
       alignItems: 'center',
@@ -426,8 +426,8 @@ const renderHiddenItem = (data, rowMap) => {
       flexDirection: 'row',
       justifyContent: 'space-between',
       paddingLeft: 15,
-      margin: 5,
-      marginBottom: 15,
+      margin: 10,
+      marginBottom: 20,
       borderRadius: 5,
     },
     backRightBtn: {

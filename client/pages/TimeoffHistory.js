@@ -191,8 +191,8 @@ const datay =  await response.json()
 {accessible?
   requests.map((val)=>{
     
-    let ss= moment(val.Starting).utc().format('YYYY/MM/DD');
-    let ee= moment(val.Ending).utc().format('YYYY/MM/DD');
+    let ss= moment(val.Starting).format('YYYY/MM/DD');
+    let ee= moment(val.Ending).format('YYYY/MM/DD');
     const y=moment.preciseDiff(ss,ee,true)
     const u=y['days']
      let datayy={
@@ -217,8 +217,8 @@ const datay =  await response.json()
   :
   requests.map((val)=>{
   if(val.emplyeeId===idEm){
-  let ss= moment(val.Starting).utc().format('YYYY/MM/DD');
-  let ee= moment(val.Ending).utc().format('YYYY/MM/DD');
+  let ss= moment(val.Starting).format('YYYY/MM/DD');
+  let ee= moment(val.Ending).format('YYYY/MM/DD');
   const y=moment.preciseDiff(ss,ee,true)
   const u=y['days']
    let datayy={
@@ -240,7 +240,10 @@ requestOffEm.push(datayy);
 }
  );}
        
+ const myData = [].concat(requestOffEm)
+ .sort((a, b) => a.Starting > b.Starting ? -1 : 1)
 
+console.log(myData)
     accessible?
     requestOffEm.map((val)=>{
   employees.map((valr)=>{
@@ -351,7 +354,7 @@ fontSize:20,fontWeight:'800',padding:20,color:colors.buttons}}>History of Time o
    
     </TouchableOpacity>
 {
-  requestOffEm.map((val)=>{
+  myData.map((val)=>{
      let j="";
      let t=val.Type;
      if(t==="Work from Home"){
@@ -473,7 +476,7 @@ fontSize:20,fontWeight:'800',padding:20,color:colors.buttons}}>History of Time o
               <Text style={{backgroundColor:'#FFC300',
              fontSize:25,fontWeight:'800',padding:20,
              }}
-             > 🌈Vacation</Text>
+             > 🏝Vacation</Text>
              <View style={{backgroundColor:'#EEF780'}}>
       
              <Text style={{fontSize:20,
@@ -555,8 +558,13 @@ fontSize:20,fontWeight:'800',padding:20,color:colors.buttons}}>History of Time o
           
            </TouchableOpacity>
        {
-         requestOffEm.map((val)=>{
+         myData.map((val)=>{
             let j="";
+            let t=val.Type;
+            if(t==="Work from Home"){
+              t="WFH       "
+            }
+
 
             if(val.StatusHR==="rejected"){
               
@@ -603,7 +611,7 @@ fontSize:20,fontWeight:'800',padding:20,color:colors.buttons}}>History of Time o
                   
                   }}  >
            
-           <Text style={styles.text}> {val.Type}</Text>
+           <Text style={styles.text}> {t}</Text>
            <Text style={styles.text}> {val.duration} </Text>
            <Text style={styles.text}>{j} </Text>
            <Icon3  style={styles.textIcon2} name='arrow-right' />

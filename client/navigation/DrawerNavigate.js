@@ -205,16 +205,7 @@ const datay =  await response.json()
 
           }}
           />
-           <Drawer.Screen name="MyLocation" component={Location} 
-          options={{
-            title:"Location History",
-           
-            drawerIcon:({focussed,size})=>(
-            <Icon5 name="map-marker" color="green" size={size} />
-            )
-
-          }}
-          />
+          
           {flag ? <Drawer.Screen name="Recruitment" component={Recruitment} 
           options={{
             title:"Recruitment",

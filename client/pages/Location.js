@@ -1,6 +1,7 @@
 import React,{useState,useEffect,useRef} from 'react';
 import 'react-native-gesture-handler';
-
+import { v4 as uuidv4 } from 'uuid';
+import "react-native-get-random-values";
 import { StyleSheet,ScrollView, Text, View,Animated,Modal,Alert,TouchableOpacity,Dimensions,TextInput} from 'react-native';
 import{colors} from "../global/styles"
 import HomeHeader from '../components/HomeHeader';
@@ -13,208 +14,52 @@ import {Button} from 'react-native-elements'
 import Axios from 'axios';
 import Icon4 from 'react-native-vector-icons/AntDesign';
 import MapView,{Marker,Circle} from 'react-native-maps';
+import {reverseGeocodeAsync} from 'expo-location';
+
 import { acc } from 'react-native-reanimated';
+let locations=[];
+export default function Location({ route, navigation }){
+  const { location } = route.params;
+  const [address,setDisplayCurrentAddress]=useState("")
 
-let Mylocations=[];
-
-const ModalPoup = ({visible, children}) => {
-   const [showModal, setShowModal] = React.useState(visible);
-   const scaleValue = React.useRef(new Animated.Value(0)).current;
-   React.useEffect(() => {
-     toggleModal();
-   }, [visible]);
-   const toggleModal = () => {
-     if (visible) {
-       setShowModal(true);
-       Animated.spring(scaleValue, {
-         toValue: 1,
-         duration: 300,
-         useNativeDriver: true,
-       }).start();
-     } else {
-       setTimeout(() => setShowModal(false), 200);
-       Animated.timing(scaleValue, {
-         toValue: 0,
-         duration: 300,
-         useNativeDriver: true,
-       }).start();
-     }
-   };
-   return (
-     <Modal transparent visible={showModal}>
-       <View style={styles.modalBackGround}>
-         <Animated.View
-           style={[styles.modalContainer, {transform: [{scale: scaleValue}]}]}>
-           {children}
-         </Animated.View>
-       </View>
-     </Modal>
-   );
- };
- let accessible;
-export default function Location({navigation}){
-   const [emai,setEmail]=useState("");
-   const [locations,setLocations]=useState([])
-
-const [show,setShow]=useState(false)
-const [longitude,setLangitude]=useState()
-const [latitude,setLatitude]=useState()
-const [employees,setEmployees]=useState([]);
-
-   const getData = async () => {
-      try {
-        const  value = await AsyncStorage.getItem('Mobile')
-        if(value !== null) {
-         
-          
-          const response =  await fetch('http://10.0.2.2:3001/check3', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({
-    
-   value,
-   
-    
-  }),
-
-})
-
-const datay =  await response.json()
-
-  if (datay.user) { 
-   setEmail(datay.email)
-   
-   
-  } else
-
-  {
-    
-  }
-
-          
-
-
-        }
-        else{
-          navigation.navigate("Signin")
-        }
-      } catch(e) {
-        // error reading value
-        alert("wrong")
-      }
+async function getAdddress(latitude,longitude){
+  try
+   { let response = await reverseGeocodeAsync({
+    latitude,
+    longitude
+    });
+    for (let item of response) {
+      let addressg = `${item.name},postal code: ${item.postalCode},City: ${item.city}`;
+     console.log(addressg)
+      setDisplayCurrentAddress(addressg);
     }
-    
-    getData()
 
-    useEffect(()=>{
-      Axios.get('http://10.0.2.2:3001/getAllActive').then((response)=>{
-          setEmployees(response.data);
-    
-        })
-     
-    },[]);
-    Mylocations=[];
-
-    useEffect(()=>{
-      Axios.get('http://10.0.2.2:3001/getLocation').then((response)=>{
-        setLocations(response.data);}) })
-accessible? locations.map((val)=>{
-  
-     Mylocations.push({
-        "id":val._id,
-        'email':val.email,
-        "longitude":val.longitude,
-        "latitude":val.Latitude,
-        'date':val.Date,
-
-     })
-   
- }): locations.map((val)=>{
-  if(val.email===emai)
-   {
-     Mylocations.push({
-        "id":val._id,
-        "longitude":val.longitude,
-        "latitude":val.Latitude,
-        'date':val.Date,
-
-     })
-   }
- })
-       
-   
-      
   
 
-        employees.map((val)=>{
-          if(val.email===emai){
-            if(val.accessible==="No"){
-              accessible=false;
-        
-            }
-            else{
-              accessible=true;
-        
-            }
-        
-          }
-        }) 
-        accessible?
-        Mylocations.map((val)=>{
-          employees.map((valr)=>{
-            if(valr.email===val.email){
-              val.email=valr.firstName+" "+valr.lastName;
-            }
-          })
-        })
-        :null 
+  }
+    catch(error){
+      console.log(error)
+    }
+}
+  location.map((val)=>{
+    let latitude=val.latitiude;
+    let longitude=val.longitude;
 
+    getAdddress(latitude,longitude)
+    const y={ "latitiude" :val.latitiude ,
+    "longitude" : val.longitude,
+  'address':address,
+  };
+
+    locations.push(y)
+   
+  })
 return ( 
  
-    <View >
-    <HomeHeader navigation={navigation}/>
-    {accessible?
-    <View>
        <View>
       
-      <View>
-    
-    <TouchableOpacity style={styles.container}  >
-    <Text  style={styles.text}> Name    </Text>
-                        <Text  style={styles.text}> Date </Text>
-
-            <Text  style={styles.text}>    Latitude</Text>
-            <Text style={styles.text}>Longitude </Text>
-           
-            </TouchableOpacity>
-            
-    {
-
-      Mylocations.map((val,key)=>{
-         const y=moment(val.date).utc().format("YYYY/MM/DD")
-         return ( <TouchableOpacity style={styles.container} onPress={
-            ()=>{
-               setShow(true)
-               setLangitude(val.longitude)
-               setLatitude(val.latitude)
-            }
-         }   >
-     <Text  style={styles.text2}>{val.email}  </Text>
-
-                        <Text  style={styles.text2}>{y}  </Text>
-
-            <Text key={val.id} style={styles.text2}>{val.latitude}  </Text>
-            <Text style={styles.text2}>{val.longitude} </Text>
-           
-            </TouchableOpacity>);
-      })
-    }
-    </View>
-   
-   
-{show &&  <View style={styles.mapPreview}>
+     
+  <View style={styles.mapPreview}>
             
 
         
@@ -222,12 +67,24 @@ return (
         
    
         >
-             <Marker 
-     
-     coordinate={{ latitude : parseFloat(latitude) , longitude : parseFloat(longitude) }}>
+          {locations.map((val)=>{
+            return(
+              <Marker key={uuidv4()}
+              title={val.address}
+              description="Address"
 
+             
+              coordinate={{ latitude :val.latitiude , longitude : val.longitude }}
 
-     </Marker>
+              >
+
+         
+              </Marker>
+            );
+          })}
+          
+        
+          
    
 
     
@@ -239,7 +96,7 @@ return (
   
 
 
-           </View>  }
+           </View>  
            
   
 
@@ -248,83 +105,9 @@ return (
    
            </View>
           
-
-
-    </View>:
-    <View>
-       <View>
-      
-      <View>
-    
-    <TouchableOpacity style={styles.container}  >
-                        <Text  style={styles.text}> Date  </Text>
-
-            <Text  style={styles.text}>          Latitude    </Text>
-            <Text style={styles.text}>  Longitude </Text>
-           
-            </TouchableOpacity>
-            
-    {
-
-      Mylocations.map((val,key)=>{
-         const y=moment(val.date).utc().format("YYYY/MM/DD")
-         return ( <TouchableOpacity style={styles.container} onPress={
-            ()=>{
-               setShow(true)
-               setLangitude(val.longitude)
-               setLatitude(val.latitude)
-            }
-         }   >
-                        <Text  style={styles.text}>{y}  </Text>
-
-            <Text key={val.id} style={styles.text}>{val.latitude}  </Text>
-            <Text style={styles.text}>{val.longitude} </Text>
-           
-            </TouchableOpacity>);
-      })
-    }
-    </View>
-   
-   
-{show &&  <View style={styles.mapPreview}>
-            
-
-        
-        <MapView style={{width:'100%',height:'100%'}} 
-        
-   
-        >
-             <Marker 
-     
-     coordinate={{ latitude : parseFloat(latitude) , longitude : parseFloat(longitude) }}>
-
-
-     </Marker>
-   
-
-    
-            </MapView>
-
-
-    
-
-  
-
-
-           </View>  }
-           
-  
-
-
-
-   
-           </View>
-          
-      </View>}
    
            
           
-    </View>
    
    );
 }

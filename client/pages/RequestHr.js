@@ -314,7 +314,7 @@ const datay =  await response.json()
                   <Text style={{backgroundColor:'#FFC300',
                  fontSize:25,fontWeight:'800',padding:20,
                  }}
-                 > 🌈Vacation</Text>
+                 > 🏝Vacation</Text>
                  <View style={{backgroundColor:'#EEF780'}}>
           
                  <Text style={{fontSize:20,

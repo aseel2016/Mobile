@@ -13,6 +13,8 @@ Latitude:{
 longitude:{
     type:String,
 },
+
+
 });
 const Location=mongoose.model("Location",location);
 module.exports=Location;

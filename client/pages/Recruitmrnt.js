@@ -135,7 +135,8 @@ return (
                 return (<View key={val._id} style={{backgroundColor:'#F8FEA1',borderColor:'grey',borderWidth:2,borderRadius:20}}>
                   <View style={{flexDirection:'row'}}>
                   <Text style={{fontSize:18,margin:10,marginVertical:15,fontWeight:'bold'}}>{val.title} </Text> 
-                  <Button title="🧐 Applicants "  
+
+                  <Button title={"🧐 Applicants "+ val.Applicants.length}
                   buttonStyle={{margin:8,marginVertical:15,backgroundColor:"#E61800"}}
                   titleStyle={{fontSize:16}}
                   onPress={()=>{

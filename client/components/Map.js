@@ -104,6 +104,26 @@ return true;
     setLatitude(location.coords.latitude)
     setLongitude(location.coords.longitude)
 
+    sethow(true)
+    if(location.coords.latitude && location.coords.longitude  ){
+      const response =  await fetch('http://10.0.2.2:3001/addLocation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          
+         email:email,
+         Date:new Date(),
+         Longitude:location.coords.longitude,
+         latitude:location.coords.latitude,
+         
+          
+        }),
+        
+        })}
+      
+
     
 
     }
@@ -114,25 +134,7 @@ return true;
  
  async function  handlepickMap(){
 
-  sethow(true)
-  if(longitude && latitude  ){
-    const response =  await fetch('http://10.0.2.2:3001/addLocation', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        
-       email:email,
-       Date:new Date(),
-       Longitude:longitude,
-       latitude:latitude,
-       
-        
-      }),
-      
-      })}
-    
+
 
   }
   const handlechanged =async()=>{
@@ -181,55 +183,51 @@ return true;
 
   }
 
-  
+ 
   const getData2 = async () => {
-    try {
-     
-
-        useEffect(()=>{
-          let isMounted=true;
-          if(isMounted)
-           { Axios.get('http://10.0.2.2:3001/getClock').then((response)=>{
-                setClocks(response.data);
-          
-              })
-              let flag=false;
-              clocks.map((val)=>{
-                if(val.email===email){
-                    if(val.Clockout==null){
-                       flag=true;
-                       setClock(true);
-                       
+  
+       
         
-                    }
-                }
-              })
-              if(flag===false){
-                setClock(false)
-               
+    const response =  await fetch('http://10.0.2.2:3001/find_clock', {
+method: 'POST',
+headers: {
+'Content-Type': 'application/json',
+},
+body: JSON.stringify({
+
+email:email,
+
+}),
+
+})
+
+const datay =  await response.json()
+
+if (datay.user) { 
+  setClock(true);
+
+
+} else
+
+{
+setClock(false);
+
+}
+
     
-              }
-    }
-    return () => { isMounted = false }; // cleanup toggles value, if unmounted
 
-           
-        })
-      
-        
-      
-      }
-     catch(e) {
-      // error reading value
-      alert("wrong")
-    }
-  }
-  getData2()
+
+
+}
+getData2()
 
   
   let locationpreviw=<Text style={{fontSize:20,fontWeight:'800',marginRight:80}}>No location picked yet</Text>
   if(latitude && show){
     locationpreviw=(
-        <MapView style={{width:'100%',height:'100%'}} 
+        <MapView 
+        style={{width:'100%',height:'100%'}}
+
         showsUserLocation={true}
         onUserLocationChange={(E)=>{console.log("locationchanged",E.nativeEvent.coordinate)
        setLongitude(E.nativeEvent.coordinate.longitude)
@@ -257,21 +255,15 @@ return true;
  
     return (<View style={{marginTop:30}} >
        
-        <View style={{flexDirection:'row'}}>
+        <View style={{alignItems:'center',justifyContent:'center'}} >
 
-            <Button title="🚀Locate Me" onPress={handlegetLocation}
-             buttonStyle={{backgroundColor:'#5050E6',paddingHorizontal:15,margin:20}}
-             titleStyle={{fontSize:20,fontWeight:'800'}}
+            <Button title="🚀 Locate Me" onPress={handlegetLocation}
+             buttonStyle={{backgroundColor:'#5050E6',width:200,paddingHorizontal:15,margin:20}}
+             titleStyle={{fontSize:25,fontWeight:'800'}}
              
              />
            
-            
-            <Button title="🗺Pick on Map" onPress={handlepickMap}
-             buttonStyle={{backgroundColor:'#5050E6',paddingHorizontal:15,margin:20}}
-             titleStyle={{fontSize:20,fontWeight:'800'}}
-            
-             />
-
+           
            
 
 

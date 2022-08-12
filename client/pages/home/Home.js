@@ -148,7 +148,7 @@ const datay =  await response.json()
   
         }
       }
-      else if(val.StatusHR==="accepted"  ){
+      else if  (val.StatusHR==="accepted"  ){
         if(y===y3 && y2===y4 && y5===y6){
           counter3=counter3+1;
   
@@ -271,14 +271,7 @@ return (
        fontSize:28,fontWeight:'800',padding:20,color:colors.buttons}}>⏰ Attendance</Text>
        </View>
        <Clock />
-       <View>
-       <Text style={{backgroundColor:'#D8D5D5',borderWidth:1,
-       fontSize:28,fontWeight:'800',padding:20,color:colors.buttons}}>🌍 Location</Text>
-       </View>
-       <View>
-        <MapLocation  />
-       
-       </View>
+   
           
           
         </View>}

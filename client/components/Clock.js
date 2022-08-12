@@ -11,14 +11,40 @@ import db from "../Firebase";
 require('moment-precise-range-plugin');
 import { v4 as uuidv4 } from 'uuid';
 import "react-native-get-random-values";
+import { getCurrentPositionAsync,PermissionStatus,useForegroundPermissions } from 'expo-location';
+import MapView,{Marker,Circle} from 'react-native-maps';
+import { Polyline } from 'react-native-maps';
+let locations=[{}];
 export default function Clock(){
-const [inClock,setClock]=useState();
+const [inClock,setClock]=useState(false);
 const[hours,setHours]=useState(0);
 const[minutes,setMinutes]=useState(0);
-const[seconds,setSeconds]=useState();
+const[seconds,setSeconds]=useState(0);
 const [email,setEmail]=useState('')
 const [clocks,setClocks]=useState([])
+const [clocked,setClocked]=useState(false)
+const [locationPermissionInformation,requestPermission]=useForegroundPermissions();
 
+
+
+const [longitude,setLongitude]=useState()
+const [latitude,setLatitude]=useState()
+const [show,setShow]=useState(false)
+async function verifyPermission(){
+  if(locationPermissionInformation.status===PermissionStatus.UNDETERMINED)
+{
+  const permissionResponse=await requestPermission();
+  return permissionResponse.granted;
+}
+if(locationPermissionInformation.status===PermissionStatus.DENIED)
+{
+  Alert.alert("insufficient permissions","you need to grant location permissions")
+return false;
+}
+
+return true;
+
+} 
 const getData = async () => {
     try {
       const  value = await AsyncStorage.getItem('Mobile')
@@ -68,57 +94,75 @@ if (datay.user) {
     }
   }
   getData()
-  
+ 
   const getData2 = async () => {
-    try {
-      let isMounted = true;    
-      if(isMounted){
-        useEffect(()=>{
-            Axios.get('http://10.0.2.2:3001/getClock').then((response)=>{
-                setClocks(response.data);
-          
-              })
-              let flag=false;
-              clocks.map((val)=>{
-                if(val.email===email){
-                    if(val.Clockout==null){
-    
-                        console.log("aseel")
-                        const y=moment();
-                        const y2=moment(val.Clockin)
-                        const y3=moment.preciseDiff(y,y2,true);
-                        const s=y3['hours']*60*60+y3['minutes']*60+y3['seconds']
-                       setSeconds(s)
-                       setClock(true)
-                       flag=true;
+  
+       
         
-                    }
-                }
-              })
-              if(flag===false){
-                setSeconds(0)
-                       setClock(false)
-    
-              }
-    
-           
-        })}
-        return () => { isMounted = false }
-      
+        const response =  await fetch('http://10.0.2.2:3001/find_clock', {
+method: 'POST',
+headers: {
+  'Content-Type': 'application/json',
+},
+body: JSON.stringify({
+  
+ email:email,
+ 
+}),
+
+})
+
+const datay =  await response.json()
+
+if (datay.user) { 
+  const y=moment();
+  const y2=moment(datay.clockin)
+  const y3=moment.preciseDiff(y,y2,true);
+  const s=y3['hours']*60*60+y3['minutes']*60+y3['seconds']
+  setSeconds(s)
+  setClock(true)
+  if(verifyPermission())
+  {
+  const locationNew=await getCurrentPositionAsync();
+  console.log(locationNew.coords.latitude)
+  console.log(locationNew.coords.longitude)
+  setLatitude(locationNew.coords.latitude)
+  setLongitude(locationNew.coords.longitude)
+  if(locationNew.coords.latitude && locationNew.coords.longitude  )
+
+  {
+
+    setShow(true)
+   
+  }
+
+ 
+
+
+  }
+
+  
+
+
+
+
+} else
+
+{
+  setSeconds(0)
+  setClock(false)
+  setShow(false)
+  
+  
+}
+
         
-      
-      }
-     catch(e) {
-      // error reading value
-      alert("wrong")
-    }
+
+
+    
   }
   getData2()
-
   
-  
-
-
 
 const padTTwo=(number)=>(number <=9 ? `0${number}`:number);
 
@@ -149,45 +193,75 @@ return `00:${padTTwo(minute)}:${padTTwo(remainSeconds)}`
 
 
       
+  
 
 async function handleclock(){
     setClock(!inClock)
     if(!inClock){
-        const inC =moment();
-        const response = await fetch('http://10.0.2.2:3001/insert_clock', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({
+      const hasPermit=await verifyPermission();
+  if(!hasPermit){
+      return;
+
+  }
+  else{
+  const location=await getCurrentPositionAsync();
+  const inC =moment();
+  console.log(location.coords.latitude)
+  console.log(location.coords.longitude)
+  setLatitude(location.coords.latitude)
+  setLongitude(location.coords.longitude)
+  if(location.coords.latitude && location.coords.longitude  ){
+    setShow(true)
+    const response = await fetch('http://10.0.2.2:3001/insert_clock', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
         email:email,
         Clockin:inC,
-			}),
-
-		})
+        location:
+        {'longitude':location.coords.longitude,'latitiude':location.coords.latitude},
+       
+  
+      }),
+  
+    })
+  
+  
     
 
-    }
-    if(inClock){
+  
+
+  }
+  }
+     
+  
+
+
+
+  
+
+  }
+  if(inClock){
+    
+      const outC=moment()
       
-        const outC=moment()
-        
-        const response = await fetch('http://10.0.2.2:3001/update_clock', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({
-        email:email,
-        Clockout:outC,
-			}),
+      const response = await fetch('http://10.0.2.2:3001/update_clock', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      email:email,
+      Clockout:outC,
+    }),
 
-		})
+  })
 
 
-    }
-   
-
+  }
+ 
   
    
 }
@@ -201,21 +275,21 @@ useEffect(()=>{
         setSeconds(seconds+1)
         displayTime(seconds)
         if(seconds>=54000){
-            setClock(!inClock)
-            //send notification you are 
-            //in from 15 hours clocked out automaticaly
-            const data = {
-              message:"You have clocked in fot 15 hours,we clocked you automatically",
-              Rec_email:email
-            };
-            
-            setDoc(doc(db,"notifications",uuidv4()),data);
+          setClock(false)
+          setSeconds(0)
+          //send notification you are 
+          //in from 15 hours clocked out automaticaly
+          const data = {
+            message:"You have clocked in for 15 hours,we clocked you out automatically",
+            Rec_email:email
+          };
+          
+          setDoc(doc(db,"notifications",uuidv4()),data);
 
 
 
-        }
-
-    },1000)
+      }
+},1000)
 
   }
   else{
@@ -232,6 +306,59 @@ useEffect(()=>{
 
 },[seconds,inClock])
 
+  
+let locationpreviw=<Text style={{fontSize:20,fontWeight:'800',marginRight:80}}>No location picked yet</Text>
+if(latitude && show){
+  locationpreviw=(
+      <MapView 
+      style={{width:'100%',height:'100%'}}
+
+      showsUserLocation={true}
+      onUserLocationChange={(E)=>{console.log("locationchanged",E.nativeEvent.coordinate)
+     setLongitude(E.nativeEvent.coordinate.longitude)
+     setLatitude(E.nativeEvent.coordinate.latitude)
+     if(inClock){
+      setLongitude(E.nativeEvent.coordinate.longitude)
+      setLatitude(E.nativeEvent.coordinate.latitude)
+      const response =  fetch('http://10.0.2.2:3001/update_location', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+         
+          
+          location:
+          {'longitude':E.nativeEvent.coordinate.longitude,'latitiude':E.nativeEvent.coordinate.latitude},
+         
+    
+        }),
+    
+      })
+     }
+
+     
+     
+ 
+    
+    }}
+      >
+        
+          
+            <Marker 
+   
+            coordinate={{ latitude : latitude , longitude :longitude }}/>
+         
+           
+          
+      
+          
+          </MapView>
+
+
+  )
+
+}
 
 
     return (<View >
@@ -253,6 +380,17 @@ useEffect(()=>{
         />
         </View>
        </TouchableOpacity>
+       <View>
+       <Text style={{backgroundColor:'#D8D5D5',borderWidth:1,
+       fontSize:28,fontWeight:'800',padding:20,color:colors.buttons}}>🌍 Location</Text>
+       </View>
+       <View style={styles.mapPreview}>
+            {locationpreviw}
+       
+
+
+           </View> 
+         
        
 
     </View>);
@@ -272,4 +410,17 @@ const styles = StyleSheet.create({
         
 
     },
+    mapPreview:{
+      marginVertical:8,
+      width:500,
+      height:500,
+      justifyContent:'center',
+      alignItems:'center',
+      backgroundColor:'#E2E0E0',
+      borderRadius:10,
+      
+      
+  
+  
+     },
   });

@@ -14,6 +14,7 @@ import Messages from '../pages/Messages';
 import Applicants from '../pages/Applicants'
 import OutTheoffice from '../pages/OutTheoffice'
 import RequestHR from '../pages/RequestHr'
+import Location from '../pages/Location'
 const Stack = createNativeStackNavigator();
 
 export default function NavigateScreens() {
@@ -59,6 +60,9 @@ export default function NavigateScreens() {
      
      
      <Stack.Screen  name="Messages" component={Messages} 
+       />
+<Stack.Screen  name="Location" component={Location} 
+
        />
 
 

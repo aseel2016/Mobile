@@ -10,6 +10,14 @@ Clockin:{
 Clockout:{
     type:Date,
 },
+location:{
+    type:[
+        { 'longitude':Number,
+         'latitiude':Number,
+    
+        }
+    ],
+}
 
 });
 const Clock=mongoose.model("Clock",clock);
