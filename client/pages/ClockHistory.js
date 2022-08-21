@@ -2,6 +2,14 @@ import React,{useState,useEffect,useRef} from 'react';
 import { StyleSheet,TouchableOpacity,Modal,Animated,ScrollView, Text, View,Alert,Dimensions, FlatList} from 'react-native';
 import {colors} from '../global/styles'
 import HomeHeader from '../components/HomeHeader';
+import {
+  LineChart,
+  BarChart,
+  PieChart,
+  ProgressChart,
+  ContributionGraph,
+  StackedBarChart
+} from "react-native-chart-kit";
 import AsyncStorage from '@react-native-async-storage/async-storage';  
 import moment, { preciseDiff } from 'moment';
 import * as Animatable from 'react-native-animatable';
@@ -15,17 +23,20 @@ import { Searchbar } from 'react-native-paper';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { Card,Avatar,IconButton } from 'react-native-paper';
 import {  Portal,Snackbar ,TextInput,Checkbox  ,  Button, Provider } from 'react-native-paper';
+import SelectList from 'react-native-dropdown-select-list'
 
 import Axios from 'axios';
 let clocksAll=[];
 let history=[];
 let clocksperday=[];
 let accessible;
-
+let labels=[];
+let datac=[];
 const ModalPoup = ({visible, children}) => {
   const [showModal, setShowModal] = React.useState(visible);
   const scaleValue = React.useRef(new Animated.Value(0)).current;
  
+
   React.useEffect(() => {
 
     let isMounted=true;
@@ -70,8 +81,11 @@ export default function ClockHistory({navigation}){
 const [date,setDate]=useState();
    const [show,setShow]=useState(false);
    const [show2,setShow2]=useState(false);
+   const[index,setIndex]=useState(5)
+   const[text,setText]=useState("see older")
    const[cohsen,setChosenName]=useState("")
-
+   const [selected2, setSelected2] = React.useState("");
+const[showChart,setShowCahrt]=useState(false)
    const [searchQuery, setSearchQuery] = React.useState('');
 
    const onChangeSearch = query => setSearchQuery(query);
@@ -87,7 +101,8 @@ const [date,setDate]=useState();
      const [isDatePickerVisible2, setDatePickerVisibility2] = useState(false);
   
   
-   
+     labels=[];
+      datac=[];
    useEffect(()=>{
     let isMounted=true;
     if(isMounted){
@@ -451,14 +466,109 @@ const myData = [].concat(clocksperday)
  async function handlepressed (){
 Alert.alert("gg")
  }
+
+let emps=[];
+ employees.map((val)=>{
+  emps.push({
+    'key':val._id,
+    'value':val.firstName+" "+val.lastName,
+  })
+ })
+
+ const handlechart=()=>{
+  setShowCahrt(true)
+  
+ }
+let clockem=[];
+ emps.map((val)=>{
+  if(val.key===selected2){
+    let name=val.value;
+    myData.map((valk)=>{
+      if(valk.email===name){
+clockem.push(valk)
+      }
+    })
+
+
+  }
+})
+
+clockem.map((val)=>{
+  const y=val.total;
+  const o=y.split(" ")
+  const h=o[0].split("H")
+  const m=o[1].split("M")
+  console.log(y)
+  if(parseInt(m))
+  console.log(parseInt(h) +"  "+parseInt(m))
+  labels.push(val.date)
+  const j=parseInt(m)/60.00
+  const f=j+parseInt(h)
+  datac.push(f)
+  
+})
 return ( 
   <ScrollView style={{width:'100%'}}>
 <View >
        <HomeHeader navigation={navigation}/>
 
        {accessible?
-       <View>
 
+       <View>
+        <View style={{borderColor:'grey',padding:10,backgroundColor:'#E2E0E0'}}>
+          <Text style={{fontWeight:'bold',fontSize:19,margin:10}}>📊 Visual representation for the work hours for each employee
+          </Text>
+          </View>
+<View style={{flexDirection:'row',margin:20,width:300}}>
+
+
+<SelectList 
+              style={{width:300}}
+              setSelected={setSelected2}
+              
+              data={emps} />
+        
+  <Button mode='contained' 
+  onPress={handlechart}
+  style={{marginHorizontal:20,height:40}}>Show</Button>
+
+ 
+  </View>
+<View>
+
+{showChart && 
+  <ScrollView horizontal={true}>
+<BarChart
+  style={{marginVertical:20}}
+  data={{
+    labels: labels,
+    datasets: [
+      {
+        data: datac
+      }
+    ]
+  }}
+  width={1000}
+  height={500}
+  yAxisLabel="🕑"
+  chartConfig={{
+    backgroundGradientFrom: "#1E2923",
+    backgroundGradientFromOpacity: 0,
+    backgroundGradientTo: "#08130D",
+    backgroundGradientToOpacity: 0.5,
+    color: (opacity = 1) => 'blue',
+    strokeWidth: 2, // optional, default 3
+    barPercentage: 0.5,
+    useShadowColorFromDataset: false // optional
+  }}
+  verticalLabelRotation={30}
+/> 
+</ScrollView>}
+</View>
+  <View style={{borderColor:'grey',padding:10,backgroundColor:'#E2E0E0'}}>
+          <Text style={{fontWeight:'bold',fontSize:19,margin:10}}>🕑Time and 🌍Location tracking 
+          </Text>
+          </View>
 <View style={{flexDirection:'row'}}>
 
 <IconButton mode="contained"
@@ -502,7 +612,7 @@ return (
 
            
       {
-       myData.map((val,key)=>{
+       myData.slice(0,index).map((val,key)=>{
          let icon;
          const y=val.total.split(" ");
          const o=y[0].split("H")  
@@ -582,6 +692,31 @@ return (
          
        })
       }
+      
+<Text 
+onPress={
+()=>
+ {
+
+  if(text==="see less"){
+    setIndex(4)
+    setText("see older")
+
+  }
+  else
+  {
+    if((index+4)>= myData.length){
+setText("see less")
+ }
+
+ setIndex(index+4)
+}
+}
+}
+style={{fontSize:20,margin:10,fontWeight:'bold',textDecorationLine:'underline'}}>{text}</Text>
+
+
+
        { show && <ModalPoup visible={show}>
        <View style={{alignItems: 'center'}}>
          <View style={styles.header}>

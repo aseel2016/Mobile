@@ -45,15 +45,18 @@ async function getAdddress(latitude,longitude){
     let latitude=val.latitiude;
     let longitude=val.longitude;
 
-    getAdddress(latitude,longitude)
+    
     const y={ "latitiude" :val.latitiude ,
     "longitude" : val.longitude,
-  'address':address,
+  'address':"address",
   };
 
     locations.push(y)
    
   })
+
+
+  getAdddress(location[0].latitiude,location[0].longitude)
 return ( 
  
        <View>
@@ -70,7 +73,7 @@ return (
           {locations.map((val)=>{
             return(
               <Marker key={uuidv4()}
-              title={val.address}
+              title={address}
               description="Address"
 
              

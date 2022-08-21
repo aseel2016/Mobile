@@ -13,6 +13,9 @@ Description:{
 state:{
     type:String,
 },
+openDate:{
+type:Date,
+},
 Keywords:{
     type:[String],
 },
@@ -20,6 +23,7 @@ Applicants:{
 type:[
     { 'email':String,
      'status':String,
+     'date':Date,
 
     }
 ],

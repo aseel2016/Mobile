@@ -15,6 +15,9 @@ import Applicants from '../pages/Applicants'
 import OutTheoffice from '../pages/OutTheoffice'
 import RequestHR from '../pages/RequestHr'
 import Location from '../pages/Location'
+import EmployeeProfile from '../pages/EmployeeProfile';
+import EditprofileEmployee from '../pages/EditprofileEmployee'
+import AllOutTheoffice from '../pages/AlloutTheoffice'
 const Stack = createNativeStackNavigator();
 
 export default function NavigateScreens() {
@@ -76,8 +79,24 @@ export default function NavigateScreens() {
 }}
 />
 
+<Stack.Screen  name="AllOutTheoffice" component={AllOutTheoffice}
+ options={{title:"out the office"
+  
+}}
+/>
+
+<Stack.Screen  name="EmployeeProfile" component={EmployeeProfile}
+ options={{title:"Profile"
+  
+}}
+/>
 
 
+<Stack.Screen  name="EditprofileEmployee" component={EditprofileEmployee}
+ options={{title:"Edit Profile"
+  
+}}
+/>
    </Stack.Navigator>
   );
 }

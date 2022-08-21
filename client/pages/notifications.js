@@ -135,12 +135,26 @@ employees.map((val)=>{
 
   })):(
     notification2.map((val)=>{
-      let f={
-        'key':val.id,
-         'title':val.message,
-
-          }
-              data.push(f);
+      if(val.Request_id!==undefined){
+        let f={
+          'key':val.id,
+          'idEm': val.employee_id,
+          'name':val.employee_first_name+" "+val.employee_last_name,
+          'title':val.message,
+          'requestId':val.Request_id,
+    
+        }
+        data.push(f);
+      }
+      else{
+        let f={
+          'key':val.id,
+           'title':val.message,
+  
+            }
+                data.push(f);
+      }
+      
 
     })
   )
@@ -211,12 +225,11 @@ employees.map((val)=>{
           
 
             onPress={()=>
-              {accessible?navigation.navigate("RequestHR",{name:data.item.name,
+              navigation.navigate("RequestHR",{name:data.item.name,
                 keyNote:data.item.key,idEm:data.item.idEm,
                 reqId:data.item.requestId
               
-              }):
-              console.log("Elementtouched")}
+              })
               }
             underlayColor={'#aaa'}>
             <View>
@@ -229,7 +242,22 @@ employees.map((val)=>{
                   
                   </View>
                 :
-                <View><Text style={styles.title} > {data.item.title}</Text></View>
+
+                <View>
+                  {(data.item.requestId===undefined)?<View>
+                    <Text style={styles.title} > {data.item.title}</Text>
+
+                    </View>:
+                    <View style={{flexDirection:'row'}}>
+                       <Text style={styles.title} >{data.item.name}
+                  </Text> 
+                  <Text style={styles.title} > {data.item.title}
+                  </Text> 
+                    </View>}
+
+                  
+                  
+                  </View>
                 }
                 
               

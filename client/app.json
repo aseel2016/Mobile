@@ -1,6 +1,5 @@
 {
   "expo": {
-   
     "name": "mobileApp",
     "slug": "mobileApp",
     "version": "1.0.0",
@@ -26,13 +25,8 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "intentFilters":[
-        
-      ]
-
-      
-
-
+      "intentFilters": [],
+      "package": "com.aseel_bustami.mobileApp"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -42,11 +36,9 @@
         "expo-image-picker",
         {
           "cameraPermission": "The app needs permission to use Camera",
-          "photosPermission":	"The app needs permission to access your photos"
+          "photosPermission": "The app needs permission to access your photos"
         }
-        
       ]
     ]
-
   }
 }

@@ -1,5 +1,7 @@
 import React,{useState,useEffect,useRef} from 'react';
 import 'react-native-gesture-handler';
+import { xorBy } from 'lodash'
+import { List } from 'react-native-paper';
 
 import { StyleSheet, Text,TouchableOpacity, View,ScrollView,Alert,Dimensions} from 'react-native';
 import {Calendar, CalendarList} from 'react-native-calendars';
@@ -20,19 +22,27 @@ import { Modal, Portal,Snackbar ,TextInput,Checkbox  ,  Button, Provider } from 
 import { v4 as uuidv4 } from 'uuid';
 import "react-native-get-random-values";
 let dataEvent=[];
-
+let accessible;
 let idEventF;
 let eventupdate;
+let itemsEmployee=[];
 export default function Calender({navigation}){
   const [checked, setChecked] = useState(false);
+  const [checked2, setChecked2] = useState(false);
+  const [holidays,setHolidays]=useState([]);
+
   const [sub, setSub] = useState("");
   const [desc, setDesc] = useState("");
   const [dateStart, setDatestart] =useState(moment());
-
+  const [selectedTeams, setSelectedTeams] = useState([])
+  const [selectedTeam, setSelectedTeam] = useState({})
   const [dateend, setDateend] = useState(moment());
   const [timeStart, setTimestart] = useState(moment());
   const [timeend, setTimeend] =useState(moment());
 const[already,setAlready]=useState(false)
+
+const[already2,setAlready2]=useState(false)
+
   const [emai,setEmail]=useState("");
   const [employees,setEmployees]=useState([]);
 const [items,setItems]=useState({});
@@ -46,7 +56,21 @@ const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
 
    const [idEvent, setIdEvent] = useState("");
-
+   function onChange() {
+    return (val) => setSelectedTeam(val)
+  }
+   function onMultiChange() {
+    
+  
+    return (item) =>{
+      console.log(item)
+      setSelectedTeams(xorBy(selectedTeams, [item], 'id'))}
+  }
+  useEffect(()=>{
+    Axios.get('http://10.0.2.2:3001/getHolidays').then((response)=>{
+      setHolidays(response.data);
+    })
+  },[]);
    const randomNumber = () => {
     const generateRandomColor = Math.floor(Math.random() * 16777215)
         .toString(16)
@@ -197,6 +221,32 @@ const datay =  await response.json()
       })
    
   },[]);
+  
+  employees.map((val)=>{
+    if(val.email===emai){
+      if(val.accessible==="No"){
+        accessible=false;
+  
+      }
+      else{
+        accessible=true;
+  
+      }
+  
+    }
+  })
+  itemsEmployee=[];
+  employees.map((val)=>{
+    const u={
+      id:val._id,
+      item:val.firstName+" "+val.lastName,
+      email:val.email,
+    
+  
+    }
+    itemsEmployee.push(u)
+  })
+  
   events.map((val,key)=>{
     let d;
     if(val.Emails.includes(emai)){
@@ -264,7 +314,29 @@ const datay =  await response.json()
   }
   }
   )
-  
+  async function handlesendinvitation(){
+    const y=dateStart.format("YYYY-MM-DD")
+    const h=timeStart.format("hh:mm:ss")
+    const f=(y+"T"+h).toString();
+    const f2=new Date(f)
+
+    const y1=dateend.format("YYYY-MM-DD")
+    const h1=timeend.format("hh:mm:ss")
+    const f1=(y1+"T"+h1).toString();
+    const f3=new Date(f1)
+   {/* Subject:sub,
+        StartTime:f2,
+        EndTime:f3,
+        IsAllDay:checked,       
+        resouceID:1,
+        Description:desc,
+			}),*/}
+
+      setAlready2(true)
+
+    
+    
+  }
   async function handleupdateEvent(){
       const y=dateStart.format("YYYY-MM-DD")
       const h=timeStart.format("hh:mm:ss")
@@ -344,6 +416,39 @@ setVisible3(true)
   
 
 }
+async function handleinvite(email){
+  Alert.alert("💫Success","👨‍👧‍👧Invitation Email sent successfully ")
+
+  const y=dateStart.format("YYYY-MM-DD")
+  const h=timeStart.format("hh:mm:ss")
+  const f=(y+"T"+h).toString();
+  const f2=new Date(f)
+
+  const y1=dateend.format("YYYY-MM-DD")
+  const h1=timeend.format("hh:mm:ss")
+  const f1=(y1+"T"+h1).toString();
+  const f3=new Date(f1)
+  const response = await fetch('http://10.0.2.2:3001/sendInvitation', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      Id:eventupdate,
+      Subject:sub,
+      StartTime:dateStart.format("YYYY-MM-DD"),
+      dateStart:timeStart.format("hh:mm:ss"),
+      EndTime:dateend.format("YYYY-MM-DD"),
+      EndDate:timeend.format("hh:mm:ss"),
+      Description:desc,
+      email:email,
+    }),
+
+  })
+
+  
+
+}
   async function handlecreateEvent(){
     const y=dateStart.format("YYYY-MM-DD")
     const h=timeStart.format("hh:mm:ss")
@@ -417,6 +522,43 @@ const loadItems = (day) => {
 
       if (!items[strTime]) {
         items[strTime] = [];
+
+        holidays.map((val,key)=>{
+          const s=moment(val.start).format("YYYY-MM-DD")
+          const e=moment(val.end).format("YYYY-MM-DD")
+         
+          if(s===e)
+              {if(s===strTime){
+                items[strTime].push({
+                  Id:val._id,
+                  name: val.name,
+                  description:" 🏜 Vacation",
+                  color:randomNumber(),
+                  isAllday:"From "+s+" To "+e,
+                  day: strTime,
+                
+                });
+  
+              }}
+              else{
+                if(strTime>=s && strTime<=e){
+                  items[strTime].push({
+                    Id:val._id,
+                    name: val.name,
+                    description:"🏝 Vcation",
+                    color:randomNumber(),
+                    isAllday:"From"+s+" To"+e,
+                    day:strTime ,
+                  
+                  });
+    
+                }
+
+              }
+
+       
+
+        })      
         
           dataEvent.map((val)=>{
             if(val.IsAllDay){
@@ -552,7 +694,6 @@ const loadItems = (day) => {
       const containerStyle = {backgroundColor: 'white', padding: 20};
 
    
-
 return ( 
 <View style={{flex:1}}>
 <HomeHeader navigation={navigation}/>
@@ -872,6 +1013,17 @@ return (
     /> 
     <Text style={{margin:5,fontSize:17,fontWeight:'bold'}}>All day</Text>   
 </View>
+{accessible?
+  <View style={{flexDirection:'row'}}>
+
+    
+     
+     
+  <Button onPress={()=>setAlready2(true)}>
+  Send invitations  👨‍👧‍👧
+  </Button>
+</View>:null}
+
  
 <View style={{flexDirection:'row'}}>
 <Button icon="update" mode="contained"  style={{marginVertical:40,marginHorizontal:40,backgroundColor:'green'}} onPress={handleupdateEvent}>
@@ -922,8 +1074,67 @@ return (
   
 </Provider>
 }
+{
+  already2 && <Provider>
+    <Portal>
+    <Modal style={{flex:1}} visible={already2} onDismiss={()=>setAlready2(false)} contentContainerStyle={containerStyle}>
+    <ScrollView>
+    <View style={{ height: 40 }} />
+     {
+      itemsEmployee.map((val)=>{
+        return(
+         <View>
+          <TouchableOpacity
+         
+          >
+          <List.Item
+          key={val.id}
+          title={val.item}
+          description={val.email}
+          right={props => <Button 
+          onPress={()=>handleinvite(val.email)}
+          >Send</Button>}
+          left={props =>
+          <Checkbox 
+            status={checked2 ? 'checked' : 'unchecked'}
+            onPress={() => {
+              setChecked2(!checked2);
+            }}
+          /> }
+       
+        />
+        
+        </TouchableOpacity>
 
-
+       
+        </View>
+ 
+        );
+       
+      })
+     }
+     <Snackbar
+    
+    style={{backgroundColor:'green'}}
+          visible={visible}
+          onDismiss={onDismissSnackBar}
+          action={{
+            label: 'Close',
+            onPress: () => {
+              setVisible(false)
+            },
+          }}>
+          
+          Invitation is sent successfully .
+        </Snackbar>
+   
+   </ScrollView>
+   
+      
+      </Modal>
+    </Portal>
+  </Provider>
+}
         </View>
 
 

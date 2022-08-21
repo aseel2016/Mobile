@@ -183,24 +183,7 @@ const response = await fetch('http://10.0.2.2:3001/update_applicant', {
     })
   }
 
-    if(type==="Rejected" || type==="Rejected after first interview"){
-    
-    }
-    
-    else if(type==="Accepted first interview"){
-      const data = {
-        managerEmail:emai,
-        applicant:email ,
-        job:job,
-        state:type,
-        
-      };
-     
-    
-     await setDoc(doc(db,"jobs",uuidv4()),data); 
-    
-    }
-    else if(type==="Accepted for first interview"){
+   
       const data = {
         Rec_email:"aseelbustami16@gmail.com",
         managerEmail:emai,
@@ -213,36 +196,7 @@ const response = await fetch('http://10.0.2.2:3001/update_applicant', {
     
      await setDoc(doc(db,"jobs",uuidv4()),data); 
     
-    }
-
-    else if(type==="Accepted second interview"){
-      const data = {
-        Rec_email:"aseelbustami16@gmail.com",
-        managerEmail:emai,
-        applicant:email ,
-        job:job,
-        state:type,
-        
-      };
-     
     
-     await setDoc(doc(db,"jobs",uuidv4()),data); 
-    
-    }
-    else if(type==="Accepted third interview"){
-      const data = {
-        Rec_email:"aseelbustami16@gmail.com",
-        managerEmail:emai,
-        applicant:email ,
-        job:job,
-        state:type,
-        
-      };
-     
-    
-     await setDoc(doc(db,"jobs",uuidv4()),data); 
-    
-    }
 }
 
 let flag=true;
@@ -292,6 +246,8 @@ return (
               onPress={()=>handlepress(y[0],y[1])} 
               buttonStyle={{marginLeft:170,padding:10,
               backgroundColor:'#FFC300'}}/>
+              
+
           
           </View>
           </Card.Content>

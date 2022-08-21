@@ -8,6 +8,8 @@ Starting:Date,
 Ending:Date,
 StatusHR:String,
 StatusManager:String,
+Deliver:Date,
+Flag:Boolean,
 
 });
 const Request=mongoose.model("Requestoff",RequestOff);

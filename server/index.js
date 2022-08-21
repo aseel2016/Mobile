@@ -414,7 +414,9 @@ app.post('/accept-reject', async (req, res) => {
   console.log(req.body);
   const id =req.body.id;
   const sta=req.body.status;
-  RequestOff.findOneAndUpdate(
+  const a=req.body.accessible;
+  
+  if(a){RequestOff.findOneAndUpdate(
     {"_id":id}, 
     { 
         $set: {'StatusHR':sta}
@@ -430,7 +432,27 @@ app.post('/accept-reject', async (req, res) => {
    else{
     res.json({user:true});
    }
-  });
+  });}
+  else{
+    RequestOff.findOneAndUpdate(
+      {"_id":id}, 
+      { 
+          $set: {'StatusManager':sta}
+      },
+      {
+          returnNewDocument: true
+      }
+    , function( error, result){
+     if(error)
+    {
+      res.json({user:false});
+    }
+     else{
+      res.json({user:true});
+     }
+    });
+  }
+  
  
 
 	
@@ -560,7 +582,7 @@ app.get("/getLocation",async(req,res)=>{
 });
 
 app.get("/getAccepted",async(req,res)=>{
-  RequestOff.find({StatusHR :'accepted'},{},(err,result)=>{
+  RequestOff.find({StatusHR :'accepted',StatusManager:'accepted'},{},(err,result)=>{
       if(err){
           res.send(err);
       }
@@ -1060,10 +1082,10 @@ app.post("/deleteteam",async(req,res)=>{
   , function( error, result){
    if(error)
   {
-    res.status(400).send("error deleting");
+    res.status(400)
   }
    else{
-    res.status(200).send("Successfully done");   }
+    res.status(200) }
   });
 });
 app.post("/deleteBill",async(req,res)=>{
@@ -1077,12 +1099,12 @@ app.post("/deleteBill",async(req,res)=>{
         returnNewDocument: true
     }
   , function( error, result){
-   if(error)
-  {
-    res.status(400).send("error deleting");
-  }
-   else{
-    res.status(200).send("Successfully done");   }
+    if (error) {
+      res.status(400).json({ user:false  });
+    }
+     else {
+      res.status(200).json({ user: true });
+    }
   });
 });
 app.post("/Updateteam",async(req,res)=>{
@@ -1251,9 +1273,9 @@ app.post("/insert_team",async(req,res)=>{
  
   doc.save((err, doc) => {
     if (err) {
-      res.status(400).send("erro")
+      res.status(400)
     } else {
-      res.status(200).send("done");
+      res.status(200);
     }
   });
 });
@@ -1694,11 +1716,31 @@ app.post('/getPhone', async (req, res) => {
             const a=req.body.add;
             const p=req.body.phone;
             const i=req.body.image;
+
+            const sa=req.body.salary; 
+            const te=req.body.team;
+            const oo=req.body.office;
+            const ev=req.body.extrava;
+            const ew=req.body.extraWFH;
             Employee.findOneAndUpdate(
               {"email":e}, 
           
               { 
-                  $set: {firstName:f,lastName:l,Address:a,phoneNumber:p,image:i}
+                  $set: {firstName:f,lastName:l,Address:a,phoneNumber:p,image:i,
+                  office:oo,
+                  ExtraWFH:parseInt(ew),
+                  ExtrsVacation:parseInt(ev),
+                  Team:te,
+                  Salary:parseInt(sa)
+
+
+                  
+
+
+                  
+                  
+                  
+                  }
               },
               {
                   returnNewDocument: true
@@ -1773,12 +1815,16 @@ app.post('/getPhone', async (req, res) => {
             const d =req.body.description;
             const e =req.body.end;
             const s =req.body.start;
+            const dat =req.body.date;
+            const f =req.body.flag;
             const doc = new RequestOff ({ 
               emplyeeId:i,
               Type:t,
               Ending:e,
               Starting:s,
               Description:d,
+              Deliver:dat,
+              Flag:f,
 })
            
             doc.save((err, doc) => {
@@ -2017,6 +2063,48 @@ app.post('/checkPassword', async (req, res) => {
    
     res.status(400).json({ user:false  });
 	}
+
+
+	
+}
+
+)
+
+
+app.post('/sendInvitation', async (req, res) => {
+	console.log(req.body);
+ 
+  const e=req.body.email;
+  const s=req.body.Subject;
+  const st=req.body.StartTime;
+  const ds=req.body.dateStart;
+  const ed=req.body.EndDate;
+  const et=req.body.EndTime;
+  const d=req.body.Description;
+  
+  
+  const id=req.body.Id;
+
+  let transporter = nodemailer.createTransport({
+   
+    service:"gmail",
+    secure:false,
+    host:'smtp.gmail.com',
+      auth: {
+      user: "aseelbustami16@gmail.com", // generated ethereal user
+      pass: "ezqsrrqxjsdyahae", // generated ethereal password
+    },
+  });
+  
+  // send mail with defined transport object
+  let info = await transporter.sendMail({
+    from: "aseelbustami16@gmail.com", // sender address
+    to: e, // list of receivers
+    subject: "Event Invitation  ✔", // Subject line
+   html:'<div><b>Hello,hope you are good,I think that you will be intersrted in this event ,the details:</b></div><p>The subject is :'+s+',Start Time :'+st+'at'+ds+'EndTime: '+et+" at "+ed+'</p><div><a   href="http://localhost:3000/addCalendar?email='+e+"&id="+id+'" >'+'<button>Accept invitation</button></a></div>'
+  });  
+  
+  console.log("Message sent: %s", info.messageId);
 
 
 	

@@ -5,6 +5,7 @@ import { Button } from 'react-native-elements';
 import AsyncStorage from '@react-native-async-storage/async-storage';  
 import Axios from 'axios'
 import moment from 'moment'
+import {reverseGeocodeAsync} from 'expo-location';
 import Firebase from '../Firebase';
 import { onSnapshot, collection, doc, updateDoc,setDoc,getFirestore,deleteDoc} from "firebase/firestore";
 import db from "../Firebase";
@@ -23,6 +24,7 @@ const[seconds,setSeconds]=useState(0);
 const [email,setEmail]=useState('')
 const [clocks,setClocks]=useState([])
 const [clocked,setClocked]=useState(false)
+const [Address,setAddress]=useState("No location is picked yet")
 const [locationPermissionInformation,requestPermission]=useForegroundPermissions();
 
 
@@ -45,6 +47,26 @@ return false;
 return true;
 
 } 
+
+async function getAdddress(latitude,longitude){
+  try
+   { let response = await reverseGeocodeAsync({
+    latitude,
+    longitude
+    });
+    for (let item of response) {
+      let addressg = `${item.name},postal code: ${item.postalCode},City: ${item.city}`;
+     console.log(addressg)
+      setAddress(addressg);
+    }
+
+  
+
+  }
+    catch(error){
+      console.log(error)
+    }
+}
 const getData = async () => {
     try {
       const  value = await AsyncStorage.getItem('Mobile')
@@ -133,6 +155,10 @@ if (datay.user) {
   {
 
     setShow(true)
+    getAdddress(locationNew.coords.latitude,locationNew.coords.longitude )
+
+    
+
    
   }
 
@@ -151,6 +177,7 @@ if (datay.user) {
 {
   setSeconds(0)
   setClock(false)
+  setAddress("No location picked ")
   setShow(false)
   
   
@@ -212,6 +239,8 @@ async function handleclock(){
   setLongitude(location.coords.longitude)
   if(location.coords.latitude && location.coords.longitude  ){
     setShow(true)
+    getAdddress(location.coords.latitude,location.coords.longitude )
+    
     const response = await fetch('http://10.0.2.2:3001/insert_clock', {
       method: 'POST',
       headers: {
@@ -246,6 +275,7 @@ async function handleclock(){
   if(inClock){
     
       const outC=moment()
+      setAddress("No location is picked")
       
       const response = await fetch('http://10.0.2.2:3001/update_clock', {
     method: 'POST',
@@ -320,6 +350,8 @@ if(latitude && show){
      if(inClock){
       setLongitude(E.nativeEvent.coordinate.longitude)
       setLatitude(E.nativeEvent.coordinate.latitude)
+      getAdddress(E.nativeEvent.coordinate.latitude,E.nativeEvent.coordinate.longitude )
+
       const response =  fetch('http://10.0.2.2:3001/update_location', {
         method: 'POST',
         headers: {
@@ -383,6 +415,11 @@ if(latitude && show){
        <View>
        <Text style={{backgroundColor:'#D8D5D5',borderWidth:1,
        fontSize:28,fontWeight:'800',padding:20,color:colors.buttons}}>🌍 Location</Text>
+       </View>
+
+       <View>
+        <Text style={{margin:20,fontSize:20,
+          fontWeight:'bold',color:'purple'}}>🗺Address: {Address}</Text>
        </View>
        <View style={styles.mapPreview}>
             {locationpreviw}

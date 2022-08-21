@@ -200,20 +200,17 @@ useEffect(()=>{
     },[]);
 requestsAll=[];
     requests.map((val,key)=>{
-        const d=new Date().getDate()
-        const m=new Date().getMonth()
-        const y=new Date().getFullYear()
+     
+        const y=new Date().getTime()
 
-        const d1=new Date(val.Starting).getDate()
-        const m1=new Date(val.Starting).getMonth()
-        const y1=new Date(val.Starting).getFullYear()
-
+        const y1=new Date(val.Starting).getTime()
+        const y3=new Date(val.Ending).getTime()
         
        
         const formattedDate = moment(val.Starting).utc().format('YYYY-MM-DD');
        
         const formattedDate2 = moment(val.Ending).utc().format('YYYY-MM-DD');
-        if(d1 >=d && m1>=m && y1>=y ){
+        if( y>=y1 && y<=y3 ){
         flag?employeesAll3.map((valid)=>{
           if(valid.id===val.emplyeeId){
             requestsAll.push({

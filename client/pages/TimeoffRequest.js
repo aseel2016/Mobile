@@ -31,6 +31,7 @@ import  { preciseDiff } from 'moment';
 import {Picker} from '@react-native-picker/picker';
 let requestOffEm=[];
 let idEm;
+let team;
 let first;
 let idReq;
 let last;
@@ -39,7 +40,8 @@ let extraw;
 let policyAll=[];
 let resultFinal=[];
 let types=[];
-
+let manager="";
+let managerEmail="";
 export default function RequestOFF({navigation}){
    const [emai,setEmail]=useState("");
    const [employees,setEmployees]=useState([]);
@@ -49,6 +51,7 @@ export default function RequestOFF({navigation}){
  const [sub, setSub] = useState("");
  const [desc, setDesc] = useState("");
  const [dateStart, setDatestart] =useState(moment());
+ const[teams,setTeams]=useState([]);
 
  const [dateend, setDateend] = useState(moment());
  
@@ -161,9 +164,31 @@ if(isMounted)
             last=val.lastName;
             extrav=val.ExtrsVacation;
             extraw=val.ExtraWFH;
+            team=val.Team;
          
          }
         })
+        useEffect(()=>{
+          Axios.get('http://10.0.2.2:3001/getAllteams').then((response)=>{
+            setTeams(response.data);
+          })
+          
+          },[]);
+
+          teams.map((val)=>{
+            if(val.name===team){
+              manager=val.Manager;
+            }
+          })
+
+          employees.map((val)=>{
+            if(val._id===manager){
+              managerEmail=val.email
+            }
+          })
+
+
+
         useEffect(()=>{
            
             
@@ -200,41 +225,91 @@ if(isMounted)
       const f1=(y1+"T"+h1).toString();
       const f3=new Date(f1)
       console.log(f2)
+      if(managerEmail!==emai){
+        let flag=false
         const response =  await fetch('http://10.0.2.2:3001/insert_request', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          
-         id:idEm,
-         type:type,
-         description:desc,
-         start:f2,
-         end:f3,
-         
-          
-        }),
-      
-      })
-      const datay =  await response.json()
-
-      if (datay.user) { 
-       idReq=datay.id;
-       Alert.alert("📢Successfully sent","💫Yoy will get the reply as soon as possible")
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            
+           id:idEm,
+           type:type,
+           description:desc,
+           start:f2,
+           end:f3,
+           date:moment(),
+           flag:flag,
+           
+            
+          }),
+        
+        })
+        const datay =  await response.json()
+  
+        if (datay.user) { 
+         idReq=datay.id;
+         Alert.alert("📢Successfully sent","💫Yoy will get the reply as soon as possible")
+        }
       }
+   
+      else{
+        let flag=true
+        const response =  await fetch('http://10.0.2.2:3001/insert_request', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            
+           id:idEm,
+           type:type,
+           description:desc,
+           start:f2,
+           end:f3,
+           date:moment(),
+           flag:flag
+           
+            
+          }),
+        
+        })
+        const datay =  await response.json()
+  
+        if (datay.user) { 
+         idReq=datay.id;
+         Alert.alert("📢Successfully sent","💫Yoy will get the reply as soon as possible")
+        }
+      }
+
+
       const data = {
         employee_id: idEm,
         employee_first_name:first,
         employee_last_name:last,
-        message:"sends you time off request",
+        message:"sends time off request",
         Rec_email:"aseelbustami16@gmail.com",
         Request_id:idReq,
       };
-      
-     await setDoc(doc(db,"notifications",uuidv4()),data);
 
+     await setDoc(doc(db,"notifications",uuidv4()),data);
+     if(managerEmail!==emai)
+    {
+       const data2 = {
+      employee_id: idEm,
+      employee_first_name:first,
+      employee_last_name:last,
+      message:"sends time off request",
+      Rec_email:managerEmail,
+      Request_id:idReq,
+    };
+     await setDoc(doc(db,"notifications",uuidv4()),data2);
+
+}
     }     
+
+
 return ( 
   <ScrollView style={{width:'100%'}}>
         <HomeHeader navigation={navigation}/>

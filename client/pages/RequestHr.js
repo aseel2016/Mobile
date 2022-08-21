@@ -41,12 +41,18 @@ let resultFinal=[];
 let types=[];
 let dateStartd=moment();
 let dateEndd=moment();
+let managerName;
 let typed="";
 let descd="";
 let Rec_email="";
 let Mefirst;
 let Melast;
 let Meid;
+let accessible;
+
+let hrstate="Waiting";
+let managerstate="Waiting";
+
 let objType={"type":"","taken":0,"Total":0,"Available":0};
 export default function RequestHR({route,navigation}){
     const { name,keyNote,idEm,reqId } = route.params;
@@ -60,7 +66,8 @@ export default function RequestHR({route,navigation}){
  const [dateStart, setDatestart] =useState(moment());
 
  const [dateend, setDateend] = useState(moment());
- 
+ const [flag, setFlag] = useState(false);
+
  resultFinal=[];
 
    const[totalDays,setTotaldays]=useState([]);
@@ -195,6 +202,21 @@ const datay =  await response.json()
             Meid=val._id;
            }
           })
+
+          employees.map((val)=>{
+            if(val.email===emai){
+              if(val.accessible==="No"){
+                accessible=false;
+          
+              }
+              else{
+                accessible=true;
+          
+              }
+          
+            }
+          })
+          
        useEffect(()=>{
            
             
@@ -220,6 +242,8 @@ const datay =  await response.json()
    
         requests.map((val)=>{
             if(val._id === reqId){
+            managerstate=val.StatusManager
+            hrstate=val.StatusHR
             let ss= moment(val.Starting).utc().format('YYYY/MM/DD');
             let ee= moment(val.Ending).utc().format('YYYY/MM/DD');
             
@@ -236,7 +260,7 @@ const datay =  await response.json()
 
            requests.map((val)=>{
               
-            if (val.emplyeeId==idEm && val.StatusHR==='accepted' )
+            if (val.emplyeeId==idEm && val.StatusHR==='accepted' && val.StatusManager==='accepted' )
           {  policyAll.map((valueEm)=>{
             if(valueEm.type===val.Type){
               const s=val.Starting;
@@ -387,6 +411,7 @@ const datay =  await response.json()
             
             id:reqId,
             status:'accepted',
+            accessible:accessible,
             
         }),
 
@@ -413,7 +438,8 @@ let messageSent;
                   employee_first_name: Mefirst,
                   employee_last_name: Melast,
                   message:messageSent,
-                  Rec_email:Rec_email
+                  Rec_email:Rec_email,
+                  Request_id:reqId,
                 };
                 
                 // Add a new document in collection "cities" with ID 'LA'
@@ -468,7 +494,8 @@ let messageSent;
                   employee_first_name: Mefirst,
                   employee_last_name: Melast,
                   message:messageSent,
-                  Rec_email:Rec_email
+                  Rec_email:Rec_email,
+                  Request_id:reqId,
                 };
                 
                 // Add a new document in collection "cities" with ID 'LA'
@@ -493,9 +520,23 @@ return (
    {u}
   
 </View>
-<Text style={{padding:20,fontSize:25,
+<View>
+<Text style={{padding:20,fontSize:20,
     fontWeight:'bold',
     backgroundColor:'#C29BFA'}}>Review time off request:</Text>
+
+<View style={{borderColor:'grey',backgroundColor:'#E2E0E0'}}>
+{(managerstate===undefined)?null:
+<Text style={{fontSize:20,margin:10,fontWeight:'bold'}}>🔔Manager :{managerstate}</Text>
+
+} 
+{(hrstate===undefined)?null:<Text
+ style={{fontSize:20,margin:10,
+ fontWeight:'bold'}}>🔔Human Resources: {hrstate}</Text>
+}
+
+</View>
+</View>
 <Provider >
   <View style={{flexDirection:'row' }}>
 

@@ -1,26 +1,32 @@
 import React,{useState,useEffect,useRef} from 'react';
 import { StyleSheet,ScrollView, Text
   , View,TouchableOpacity,Modal,Animated
-  ,Alert,Dimensions,TextInput} from 'react-native';
+  ,Alert,Dimensions} from 'react-native';
   import { v4 as uuidv4 } from 'uuid';
+  import Filter from 'react-native-vector-icons/MaterialCommunityIcons';
+
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon2 from 'react-native-vector-icons/MaterialIcons';
 import Icon3 from 'react-native-vector-icons/Feather';
 import Icon4 from 'react-native-vector-icons/AntDesign';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-
+import Ionic from 'react-native-vector-icons/Ionicons';
+import SelectList from 'react-native-dropdown-select-list'
 import Firebase from '../Firebase';
 import { onSnapshot, collection, doc, updateDoc,setDoc,getFirestore,deleteDoc} from "firebase/firestore";
 import db from "../Firebase";
 import HomeHeader from '../components/HomeHeader';
 import AsyncStorage from '@react-native-async-storage/async-storage';  
-import moment, { preciseDiff } from 'moment';
+import moment from 'moment';
+
 import { colors } from '../global/styles';
 import * as Animatable from 'react-native-animatable';
 import {Picker} from '@react-native-picker/picker';
-
-import {Button} from 'react-native-elements'
+require('moment-precise-range-plugin');
+import { IconButton ,TextInput} from 'react-native-paper';
+import {Button} from 'react-native-paper'
 import Axios from 'axios';
+import { ScreenStackHeaderSearchBarView } from 'react-native-screens';
 let requestOffEm=[];
 let idEm;
 let first;
@@ -31,7 +37,7 @@ let extraw;
 let policyAll=[];
 let resultFinal=[];
 let types=[];
-
+let emps=[];
 let accessible;
 const ModalPoup = ({visible, children}) => {
    const [showModal, setShowModal] = React.useState(visible);
@@ -71,7 +77,9 @@ export default function TimeoffHistory({navigation}){
    const [emai,setEmail]=useState("");
    const [requests,setRequests]=useState([]);
    const [requests2,setRequests2]=useState([]);
-
+   const [flagA,setFlagA]=useState(false)
+   const[index,setIndex]=useState(5)
+   const[text,setText]=useState("see older")
    const [employees,setEmployees]=useState([]);
    const [show,setShow]=useState(false);
    const [show2,setShow2]=useState(false);
@@ -79,22 +87,36 @@ const [desc,setDes]=useState("");
    const [start,setStart]=useState("");
    const [end,setEnd]=useState("");
    const [durationf,setDuration]=useState("");
-
+const[search,setSearch]=useState(false)
    const [Description,setDescription]=useState("");
-   const [datestart, setDatestart] = useState(new Date())
    const [dateend, setDateend] = useState(new Date())
    const [type,setType]=useState("");
    const [showe,setshoe2]=useState(false)
    const [showe2,setshoe22]=useState(false)
+   const [dateStart, setDatestart] =useState("");
 
-
-
+   const [selected2, setSelected2] = React.useState("");
+const[managerm,setManagerm]=useState("")
+const[hr,setHR]=useState("")
+const [isDatePickerVisible2, setDatePickerVisibility2] = useState(false);
 
    const[totalDays,setTotaldays]=useState([]);
 
+const[showUp,setShowUpload]=useState(false)
 
 
-
+   const showDatePicker2 = () => {
+    setDatePickerVisibility2(true);
+  };
+ 
+  const hideDatePicker2 = () => {
+    setDatePickerVisibility2(false);
+  };
+ 
+  const handleConfirm2 = (date) => {
+   setDatestart(moment(date).format("YYYY-MM-DD"))
+    hideDatePicker2();
+  };
    const getData = async () => {
       try {
         const  value = await AsyncStorage.getItem('Mobile')
@@ -154,7 +176,14 @@ const datay =  await response.json()
        })
 
 
-
+      emps=[];
+       employees.map((val)=>{
+        emps.push({
+          'key':val._id,
+          'value':val.firstName+" "+val.lastName,
+        })
+       })
+      
        employees.map((val)=>{
          if(val.email===emai){
             
@@ -166,20 +195,7 @@ const datay =  await response.json()
          
          }
         })
-        employees.map((val)=>{
-          if(val.email===emai){
-            if(val.accessible==="No"){
-              accessible=false;
-        
-            }
-            else{
-              accessible=true;
-        
-            }
-        
-          }
-        })
-
+     
         useEffect(()=>{
          Axios.get('http://10.0.2.2:3001/read').then((response)=>{
         setRequests(response.data);
@@ -188,38 +204,17 @@ const datay =  await response.json()
       })
        },[requests])
        requestOffEm=[];
-{accessible?
-  requests.map((val)=>{
-    
-    let ss= moment(val.Starting).format('YYYY/MM/DD');
-    let ee= moment(val.Ending).format('YYYY/MM/DD');
-    const y=moment.preciseDiff(ss,ee,true)
-    const u=y['days']
-     let datayy={
-       'key':val._id,
-       'id':val._id,
-       'Emid':val.emplyeeId,
-        'Type':val.Type,
-        'Description':val.Description,
-        'Starting':ss,
-        'Ending':ee,
-        'duration':u+" days",
-        'StatusHR':val.StatusHR,
 
-
-    
- };
-
- requestOffEm.push(datayy);
-    
-  }
-   )
-  :
+ 
+  
   requests.map((val)=>{
   if(val.emplyeeId===idEm){
   let ss= moment(val.Starting).format('YYYY/MM/DD');
   let ee= moment(val.Ending).format('YYYY/MM/DD');
-  const y=moment.preciseDiff(ss,ee,true)
+
+  let ss2= moment(val.Starting)
+  let ee2= moment(val.Ending)
+  const y=moment.preciseDiff(ss2,ee2,true)
   const u=y['days']
    let datayy={
      'key':val._id,
@@ -230,6 +225,9 @@ const datay =  await response.json()
       'Ending':ee,
       'duration':u+" days",
       'StatusHR':val.StatusHR,
+      'Deliver':val.Deliver,
+      'StatusManager':val.StatusManager,
+      'Flag':val.Flag,
 
 
   
@@ -238,22 +236,12 @@ const datay =  await response.json()
 requestOffEm.push(datayy);
   }
 }
- );}
+ );
        
  const myData = [].concat(requestOffEm)
- .sort((a, b) => a.Starting > b.Starting ? -1 : 1)
+ .sort((a, b) => a.Deliver > b.Deliver ? -1 : 1)
 
-console.log(myData)
-    accessible?
-    requestOffEm.map((val)=>{
-  employees.map((valr)=>{
-    if(valr._id===val.Emid){
-      val.Emid=valr.firstName+" "+valr.lastName;
-    }
-  })
-})
-:null
-
+   
 policyAll=[];
 resultFinal=[];
 types=[];
@@ -329,141 +317,15 @@ totalDays.map((val2)=>{
 })
 
 })
+const handleEdit=()=>{
+  setShowUpload(true)
+}
 
 return ( 
   <ScrollView style={{width:'100%'}}>
 <View >
        <HomeHeader navigation={navigation}/>
-       {accessible?
-       <View>
-<View>
-
-       
-
-
-<Text style={{backgroundColor:'#D8D5D5',
-fontSize:20,fontWeight:'800',padding:20,color:colors.buttons}}>History of Time off Requests</Text>
-<TouchableOpacity style={styles.container}  >
-
-<Text style={styles.text}> Name       </Text>
-
-    <Text style={styles.text}>   Type   </Text>
-    <Text style={styles.text}>    Status </Text>
-
    
-   
-    </TouchableOpacity>
-{
-  myData.map((val)=>{
-     let j="";
-     let t=val.Type;
-     if(t==="Work from Home"){
-      t="WFH";
-     }
-
-     if(val.StatusHR==="rejected"){
-       
-       j= <Text style={
-           {backgroundColor:'red',
-         fontSize:20,
-        fontWeight:'bold',
-        marginLeft:20,
-       
-        marginTop:30,
-        
-
-    }}>Rejected</Text>
-
-     }
-     else if (val.StatusHR==="accepted"){
-       j= <Text style={
-           {backgroundColor:'green',
-         fontSize:20,
-        fontWeight:'bold',
-        marginLeft:20,
-        
-    }}>Accepted</Text>
-
-     }
-     else{
-       j= <Text style={
-           {backgroundColor:'blue',
-         fontSize:20,
-        fontWeight:'bold',
-        marginLeft:20,
-        
-       
-    }}>Waiting </Text>
-
-     }
-     return <View key={val.key}>
-        
-        
-        <TouchableOpacity style={styles.container} onPress={()=>{
-           
-           setShow(true)
-           setStart(val.Starting)
-           setDuration( val.duration)
-           setEnd(val.Ending)
-           setDescription(val.Description)
-
-           
-           }}  >
-    <Text style={styles.text2}> {val.Emid}</Text>
-    <Text style={styles.text2}>{t}</Text>
-    <Text style={styles.text2}>{j} </Text>
-    
-
-
-   
-   
-    </TouchableOpacity>
-
-
-     </View>
-
-  })
-
-}
- { show && <ModalPoup visible={show} >
- <View style={{alignItems: 'center'}}>
-   <View style={styles.header}>
-    <Icon4  name='close'size={25} onPress={()=>setShow(false)}/>
-   </View>
- </View>
-
-
- <View style={{flexDirection:'column'}}>
- <Text style={styles.text}>Duration: {durationf}</Text>
-
-    <Text style={styles.text}>Start Date: {start} </Text>
-    <Text style={styles.text}> End Date: {end}</Text>
-    <Text style={styles.text}>Description: {Description}</Text>
-    </View>
-   
-
-   
-
-
-
-
-   
- 
-</ModalPoup>}
-
-
-
-
-
-
-
-
-
-</View>        
-
-
-       </View>
-       :
        <View>
         
        
@@ -541,7 +403,35 @@ fontSize:20,fontWeight:'800',padding:20,color:colors.buttons}}>History of Time o
        }
        
        <View>
+       <View style={{flexDirection:'row'}}>
 
+<IconButton mode="contained"
+  icon="calendar"
+  size={30}
+  style={{marginTop:20}}
+       onPress={showDatePicker2}
+       />
+
+<TextInput
+   
+   label="choose Date ..."
+   value={dateStart}
+   onChangeText={(text)=>setDatestart(text)}
+  
+   style={{width:330,marginVertical:10}} 
+   
+  
+ />
+
+   
+</View>
+
+     <DateTimePickerModal
+      isVisible={isDatePickerVisible2}
+      mode="date"
+      onConfirm={handleConfirm2}
+      onCancel={hideDatePicker2}
+    />
        
 
 
@@ -557,46 +447,76 @@ fontSize:20,fontWeight:'800',padding:20,color:colors.buttons}}>History of Time o
           
           
            </TouchableOpacity>
-       {
-         myData.map((val)=>{
+           {dateStart===""?<View>
+           {
+         myData.slice(0,index).map((val)=>{
             let j="";
             let t=val.Type;
+            let statusF="Waiting";
+
+            if(val.Flag){
+              if (val.StatusHR==="accepted"   ){
+                statusF="Accepted"
+                console.log("a")
+               }
+               if (val.StatusHR==="rejected" ){
+                statusF="Rejected"
+                console.log("r")
+               }
+            }
+            else{
+              if (val.StatusHR==="accepted"  && val.StatusManager==="accepted" ){
+                statusF="Accepted"
+                console.log("a2")
+               }
+               if (val.StatusHR==="rejected"  || val.StatusManager==="rejected"){
+                statusF="Rejected"
+                console.log("r2")
+               }
+      
+            }
+
+
+
             if(t==="Work from Home"){
               t="WFH       "
             }
 
 
-            if(val.StatusHR==="rejected"){
-              
+            if(statusF==="Rejected"){
+       
               j= <Text style={
                   {backgroundColor:'red',
                 fontSize:20,
                fontWeight:'bold',
-               margin:20,
+               marginLeft:20,
+              
                marginTop:30,
                
-
+       
            }}>Rejected</Text>
-
+       
             }
-            else if (val.StatusHR==="accepted"){
-              j= <Text style={
+            else if (statusF==="Accepted"){
+              j=<Text style={
                   {backgroundColor:'green',
                 fontSize:20,
                fontWeight:'bold',
-               margin:10,
+               marginLeft:20,
+               
            }}>Accepted</Text>
-
+       
             }
             else{
               j= <Text style={
                   {backgroundColor:'blue',
                 fontSize:20,
                fontWeight:'bold',
-               margin:10,
+               marginLeft:20,
+               
               
            }}>Waiting </Text>
-
+       
             }
             return <View key={val.key}>
                
@@ -607,6 +527,11 @@ fontSize:20,fontWeight:'800',padding:20,color:colors.buttons}}>History of Time o
                   setStart(val.Starting)
                   setEnd(val.Ending)
                   setDescription(val.Description)
+                  setHR(val.StatusHR)
+                  setManagerm(val.StatusManager)
+                  console.log(val.Flag+"")
+                  setFlagA(val.Flag)
+
 
                   
                   }}  >
@@ -615,6 +540,11 @@ fontSize:20,fontWeight:'800',padding:20,color:colors.buttons}}>History of Time o
            <Text style={styles.text}> {val.duration} </Text>
            <Text style={styles.text}>{j} </Text>
            <Icon3  style={styles.textIcon2} name='arrow-right' />
+ <View style={{marginLeft:-60,marginTop:50,justifyContent:'flex-end',alignSelf:'flex-end'}}>
+      <Text
+      style={{fontWeight:'bold',color:'grey'}}
+      >{moment(val.Deliver).format("YYYY-MM-DD")}</Text>
+    </View>
 
 
           
@@ -627,6 +557,144 @@ fontSize:20,fontWeight:'800',padding:20,color:colors.buttons}}>History of Time o
          })
       
        }
+           </View>:<View>
+           {
+         myData.map((val)=>{
+            let j="";
+            let t=val.Type;
+            let statusF="Waiting";
+
+            if(val.Flag){
+              if (val.StatusHR==="accepted"   ){
+                statusF="Accepted"
+                console.log("a")
+               }
+               if (val.StatusHR==="rejected" ){
+                statusF="Rejected"
+                console.log("r")
+               }
+            }
+            else{
+              if (val.StatusHR==="accepted"  && val.StatusManager==="accepted" ){
+                statusF="Accepted"
+                console.log("a2")
+               }
+               if (val.StatusHR==="rejected"  || val.StatusManager==="rejected"){
+                statusF="Rejected"
+                console.log("r2")
+               }
+      
+            }
+            if(t==="Work from Home"){
+              t="WFH       "
+            }
+
+
+            if(statusF==="Rejected"){
+       
+              j= <Text style={
+                  {backgroundColor:'red',
+                fontSize:20,
+               fontWeight:'bold',
+               marginLeft:20,
+              
+               marginTop:30,
+               
+       
+           }}>Rejected</Text>
+       
+            }
+            else if (statusF==="Accepted"){
+              j=<Text style={
+                  {backgroundColor:'green',
+                fontSize:20,
+               fontWeight:'bold',
+               marginLeft:20,
+               
+           }}>Accepted</Text>
+       
+            }
+            else{
+              j= <Text style={
+                  {backgroundColor:'blue',
+                fontSize:20,
+               fontWeight:'bold',
+               marginLeft:20,
+               
+              
+           }}>Waiting </Text>
+       
+            }
+
+           if(dateStart===moment(val.Deliver).format("YYYY-MM-DD"))
+           { 
+            return <View key={val.key}>
+               
+               
+               <TouchableOpacity style={styles.container} onPress={()=>{
+                  
+                  setShow(true)
+                  setStart(val.Starting)
+                  setEnd(val.Ending)
+                  setDescription(val.Description)
+                  setHR(val.StatusHR)
+                  setManagerm(val.StatusManager)
+                  console.log(val.Flag+"")
+                  setFlagA(val.Flag)
+
+
+                  
+                  }}  >
+           
+           <Text style={styles.text}> {t}</Text>
+           <Text style={styles.text}> {val.duration} </Text>
+           <Text style={styles.text}>{j} </Text>
+           <Icon3  style={styles.textIcon2} name='arrow-right' />
+ <View style={{marginLeft:-60,marginTop:50,justifyContent:'flex-end',alignSelf:'flex-end'}}>
+      <Text
+      style={{fontWeight:'bold',color:'grey'}}
+      >{moment(val.Deliver).format("YYYY-MM-DD")}</Text>
+    </View>
+
+
+          
+          
+           </TouchableOpacity>
+
+
+            </View>
+            }
+
+         })
+      
+       }</View>}
+      
+
+             
+<Text 
+onPress={
+()=>
+ {
+
+  if(text==="see less"){
+    setIndex(4)
+    setText("see older")
+
+  }
+  else
+  {
+    if((index+4)>= myData.length){
+setText("see less")
+ }
+
+ setIndex(index+4)
+}
+}
+}
+style={{fontSize:20,margin:10,fontWeight:'bold',textDecorationLine:'underline'}}>{text}</Text>
+
+
+
         { show && <ModalPoup visible={show} >
         <View style={{alignItems: 'center'}}>
           <View style={styles.header}>
@@ -636,9 +704,28 @@ fontSize:20,fontWeight:'800',padding:20,color:colors.buttons}}>History of Time o
       
 
         <View style={{flexDirection:'column'}}>
+        {flagA?
+  <View>{(hr===undefined)?<Text style={styles.text}>HR response: Waiting</Text>:
+  <Text style={styles.text}>HR response: {hr}</Text>
+ }
+</View>
+:
+<View>
+{(managerm===undefined)?<Text style={styles.text}>Manager Response: Waiting</Text>:
+   <Text style={styles.text}>Manager Response: {managerm}</Text>
+}
+{(hr===undefined)?<Text style={styles.text}>HR response: Waiting</Text>:
+ <Text style={styles.text}>HR response: {hr}</Text>
+}</View>}
+     
            <Text style={styles.text}>Start Date: {start} </Text>
            <Text style={styles.text}> End Date: {end}</Text>
            <Text style={styles.text}>Description: {Description}</Text>
+            <Button mode='contained'
+            onPress={handleEdit}
+            style={{margin:20}}> Edit </Button>
+
+
            </View>
           
        
@@ -660,7 +747,7 @@ fontSize:20,fontWeight:'800',padding:20,color:colors.buttons}}>History of Time o
        
 
       </View>
-      </View>}
+      </View>
       
     
     </View>
@@ -709,8 +796,7 @@ const styles = StyleSheet.create({
      fontSize:20,
      fontWeight:'bold',
      margin:15,
-     borderRadius:100,
-     borderWidth:1,
+     
      color:colors.buttons,
  
    },

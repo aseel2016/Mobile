@@ -5,19 +5,27 @@ import Home from '../pages/home/Home'
 import RootClient from './ClientTabs'
 import Icon from 'react-native-vector-icons/Entypo';
 import Icon2 from 'react-native-vector-icons/Fontisto';
-import Icon4  from 'react-native-vector-icons/AntDesign';
+import Icon4  from 'react-native-vector-icons/MaterialCommunityIcons';
 import RequestOFF from '../pages/TimeoffRequest';
-
+import TimeoffHistoryHR from '../pages/TimeoffHistoryHR'
+import { Ionicons } from '@expo/vector-icons';
+import AllTeams from '../pages/Allteam'
 import { View } from 'react-native';
-import Icon5  from 'react-native-vector-icons/FontAwesome';
+import Icon5  from 'react-native-vector-icons/MaterialIcons';
 
+
+import Icon44  from 'react-native-vector-icons/AntDesign';
+import Employees from '../pages/Employees';
 import Calender from '../pages/Calender';
 import Location from '../pages/Location';
 import Icon3 from 'react-native-vector-icons/MaterialCommunityIcons';
-
+import Expenses from '../pages/Expenses';
+import RecentExpenses from '../pages/RecentExpenses';
 import {colors} from '../global/styles'
 import Profile from '../pages/Profile'
 import Team from '../pages/Team'
+import Icon336 from 'react-native-vector-icons/FontAwesome';
+
 import ClockHistory from '../pages/ClockHistory'
 import TimeoffHistory from '../pages/TimeoffHistory'
 import Drawercontent  from '../components/DrawerContent';
@@ -26,9 +34,78 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import  Axios  from 'axios';
 import Reset from '../pages/ResetPassword'
 import Chat from'../pages/Chat'
+import PostJob from '../pages/PostJob';
+import Salary from '../pages/Salary';
+import ChartExpenses from '../pages/ChartExpenses'
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+
 import { useNavigationContainerRef } from '@react-navigation/native';
 const Drawer = createDrawerNavigator();
-
+const BottomTabs = createBottomTabNavigator();
+const GlobalStyles = {
+  colors: {
+    primary50: '#e4d9fd',
+    primary100: '#c6affc',
+    primary200: '#a281f0',
+    primary400: '#5721d4',
+    primary500: '#3e04c3',
+    primary700: '#2d0689',
+    primary800: '#200364',
+    accent500: '#f7bc0c',
+    error50: '#fcc4e4',
+    error500: '#9b095c',
+    gray500: '#39324a',
+    gray700: '#221c30',
+  },
+};
+function ExpensesOverview() {
+  return (
+    <BottomTabs.Navigator
+    screenOptions={{
+     headerShown:false, 
+     tabBarStyle: { backgroundColor: "#201858"},
+     tabBarActiveTintColor: GlobalStyles.colors.accent500,  }}
+     
+    >
+       <BottomTabs.Screen name="ChartExpenses" component={ChartExpenses} 
+         options={{
+   
+          tabBarLabel: 'Net chart',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="hourglass" size={size} color={color} />
+          ),
+        }}
+      />
+      <BottomTabs.Screen name="Expenses" component={Expenses} 
+         options={{
+   
+          tabBarLabel: 'Expenses',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="calendar" size={size} color={color} />
+          ),
+        }}
+      />
+      <BottomTabs.Screen name="RecentExpenses" component={RecentExpenses} 
+        options={{
+         
+          tabBarLabel: 'Income',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="server-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <BottomTabs.Screen name="Salary" component={Salary} 
+        options={{
+         
+          tabBarLabel: 'Salary',
+          tabBarIcon: ({ color, size }) => (
+            <Icon336 name="money" size={size} color={color} />
+          ),
+        }}
+      />
+    </BottomTabs.Navigator>
+  );
+}
 let idMe;
 let accessible;
 export default function DawNav() {
@@ -185,7 +262,7 @@ const datay =  await response.json()
 
           }}
           />
-         <Drawer.Screen name="TimeoffHistory" component={TimeoffHistory} 
+          {accessible?  <Drawer.Screen name="TimeoffHistoryHR" component={TimeoffHistoryHR} 
           options={{
             title:"Time off History",
            
@@ -194,7 +271,18 @@ const datay =  await response.json()
             )
 
           }}
-          />
+          />:  <Drawer.Screen name="TimeoffHistory" component={TimeoffHistory} 
+          options={{
+            title:"Time off History",
+           
+            drawerIcon:({focussed,size})=>(
+            <Icon2 name="holiday-village" color={colors.buttons} size={size} />
+            )
+
+          }}
+          />}
+       
+           {accessible?null:
           <Drawer.Screen name="RequestOFF" component={RequestOFF} 
           options={{
             title:" Time off requests",
@@ -205,7 +293,7 @@ const datay =  await response.json()
 
           }}
           />
-          
+        }
           {flag ? <Drawer.Screen name="Recruitment" component={Recruitment} 
           options={{
             title:"Recruitment",
@@ -220,7 +308,7 @@ const datay =  await response.json()
           
           
           }
-          {accessible?null:
+       
          
               <Drawer.Screen name="MyCalender" component={Calender} 
           options={{
@@ -231,15 +319,67 @@ const datay =  await response.json()
             )
 
           }}
-          />}
+          />
+        
+          {accessible?   <Drawer.Screen name="PostJob" component={PostJob} 
+     options={{
+      title:"Post new Job",
+      
+      
+       drawerIcon:({focussed,size})=>(
+       <Icon5 name="add-circle-outline" color={colors.buttons} size={size} />
+       )
 
+     }}
+     />:null
+         
+      }
+          {accessible?   <Drawer.Screen name="AllTeams" component={AllTeams} 
+     options={{
+      title:"Teams",
+      
+      
+       drawerIcon:({focussed,size})=>(
+        <Icon44 name="team" color={colors.buttons} size={size} />
+        )
+
+     }}
+     />:null
+         
+      }
+          
+          {accessible?   <Drawer.Screen name="ManageExpenses" component={ExpensesOverview} 
+     options={{
+      
+      title:"Manage Expenses ",
+       drawerIcon:({focussed,size})=>(
+       <Icon4 name="calculator-variant-outline" color={colors.buttons} size={size} />
+       )
+
+     }}
+     />:null
+         
+      }
+
+{accessible?   <Drawer.Screen name="Employees" component={Employees} 
+     options={{
+      
+      
+       drawerIcon:({focussed,size})=>(
+       <Icon336 name="group" color={colors.buttons} size={size} />
+       )
+
+     }}
+     />:null
+         
+      }
 {accessible?null:
           <Drawer.Screen name="Team" component={Team} 
           options={{
             title:"Team",
            
             drawerIcon:({focussed,size})=>(
-            <Icon4 name="team" color={colors.buttons} size={size} />
+            <Icon44 name="team" color={colors.buttons} size={size} />
             )
 
           }}
