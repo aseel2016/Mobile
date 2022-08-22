@@ -111,6 +111,7 @@ else{
   gg=false;
 }
 return ( 
+  <ScrollView style={{width:'100%'}}>
 <View >
 
       { gg?
@@ -154,6 +155,7 @@ return (
 
 
     </View>
+    </ScrollView>
    );
 }
 

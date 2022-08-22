@@ -234,10 +234,10 @@ employees.map((val)=>{
             underlayColor={'#aaa'}>
             <View>
               
-                {accessible? <View style={{flexDirection:'row'}}>
+                {accessible? <View style={{flexDirection:'row',flexWrap:'wrap'}}>
                   <Text style={styles.title} >{data.item.name}
                   </Text> 
-                  <Text style={styles.title} > {data.item.title}
+                  <Text  style={styles.title2} > {data.item.title}
                   </Text> 
                   
                   </View>
@@ -443,9 +443,10 @@ const renderHiddenItem = (data, rowMap) => {
     rowFrontVisible: {
       backgroundColor: '#FFF',
       borderRadius: 5,
-      height: 70,
+      height: 80,
       padding: 10,
       marginBottom: 20,
+      
     },
     rowBack: {
       alignItems: 'center',
@@ -487,6 +488,16 @@ const renderHiddenItem = (data, rowMap) => {
       fontWeight: 'bold',
       marginBottom: 5,
       color: '#666',
+      
     },
+    title2:{
+      fontSize: 17,
+      fontWeight: 'bold',
+      marginBottom: 5,
+      color: '#666',
+      flexWrap:'wrap'
+      
+
+    }
   
   });

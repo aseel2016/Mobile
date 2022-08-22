@@ -1,9 +1,11 @@
 import React,{useState,useEffect,useRef} from 'react';
 import { StyleSheet,ScrollView, Text
   , View,TouchableOpacity,Modal,Animated
-  ,Alert,Dimensions} from 'react-native';
+  ,Alert,Dimensions, Platform} from 'react-native';
   import { v4 as uuidv4 } from 'uuid';
   import Filter from 'react-native-vector-icons/MaterialCommunityIcons';
+  import * as DocumentPicker from 'expo-document-picker';
+  import "react-native-get-random-values";
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon2 from 'react-native-vector-icons/MaterialIcons';
@@ -12,9 +14,7 @@ import Icon4 from 'react-native-vector-icons/AntDesign';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import Ionic from 'react-native-vector-icons/Ionicons';
 import SelectList from 'react-native-dropdown-select-list'
-import Firebase from '../Firebase';
-import { onSnapshot, collection, doc, updateDoc,setDoc,getFirestore,deleteDoc} from "firebase/firestore";
-import db from "../Firebase";
+
 import HomeHeader from '../components/HomeHeader';
 import AsyncStorage from '@react-native-async-storage/async-storage';  
 import moment from 'moment';
@@ -25,7 +25,13 @@ import {Picker} from '@react-native-picker/picker';
 require('moment-precise-range-plugin');
 import { IconButton ,TextInput} from 'react-native-paper';
 import {Button} from 'react-native-paper'
+
 import Axios from 'axios';
+import Firebase from '../Firebase';
+import { onSnapshot, collection, doc, updateDoc,getDocs,getFirestore} from "firebase/firestore";
+import db from "../Firebase";
+import { storage } from "../Firebase";
+import {ref,uploadBytes,listAll,getDownloadURL} from 'firebase/storage';
 import { ScreenStackHeaderSearchBarView } from 'react-native-screens';
 let requestOffEm=[];
 let idEm;
@@ -36,7 +42,7 @@ let extrav;
 let extraw;
 let policyAll=[];
 let resultFinal=[];
-let types=[];
+let typesAllLeo=[];
 let emps=[];
 let accessible;
 const ModalPoup = ({visible, children}) => {
@@ -84,6 +90,7 @@ export default function TimeoffHistory({navigation}){
    const [show,setShow]=useState(false);
    const [show2,setShow2]=useState(false);
 const [desc,setDes]=useState("");
+const[reqId,setEeqestId]=useState("");
    const [start,setStart]=useState("");
    const [end,setEnd]=useState("");
    const [durationf,setDuration]=useState("");
@@ -244,7 +251,7 @@ requestOffEm.push(datayy);
    
 policyAll=[];
 resultFinal=[];
-types=[];
+typesAllLeo=[];
   useEffect(()=>{
    
     
@@ -262,7 +269,7 @@ types=[];
       'total':0,
     }
     policyAll.push(u);
-    types.push(val.type);
+    typesAllLeo.push(val.type);
 
   })
   requests.map((val)=>{
@@ -318,9 +325,52 @@ totalDays.map((val2)=>{
 
 })
 const handleEdit=()=>{
-  setShowUpload(true)
+  setShow(false)
+  navigation.navigate("UploadFile",{id:reqId,email:emai})
+}
+async function  handleupload(){
+  try {
+const result= await DocumentPicker.getDocumentAsync()
+ if(result.type==="cancel"){
+  console.log("cancelled")
+ }
+ else{
+  console.log(result.uri)
+ }
+
+  } catch (err) {
+  
+  }
 }
 
+async function NormalizePath(path){
+  if(Platform.OS==='ios' || Platform.OS==="android")
+  {
+    const filePrefix='file://'
+    if(path.startsWith(filePrefix)){
+      path=path.substring(filePrefix.length)
+      try{
+        path=decodeURI(path)
+      }
+      catch(e){
+
+      }
+    }
+  }
+  return path;
+
+}
+async function uploadFiletoFirebase(file){
+
+const spaceRef = ref(storage, `allFiles/${file.name}`);
+const bytes = new Uint8Array([0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x2c, 0x20, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x21]);
+
+
+uploadBytes(spaceRef, bytes).then((snapshot) => {
+  console.log('Uploaded an array!');
+});
+
+}
 return ( 
   <ScrollView style={{width:'100%'}}>
 <View >
@@ -531,6 +581,7 @@ return (
                   setManagerm(val.StatusManager)
                   console.log(val.Flag+"")
                   setFlagA(val.Flag)
+                  setEeqestId(val.id)
 
 
                   
@@ -641,6 +692,7 @@ return (
                   setManagerm(val.StatusManager)
                   console.log(val.Flag+"")
                   setFlagA(val.Flag)
+                  setEeqestId(val.id)
 
 
                   
@@ -740,7 +792,34 @@ style={{fontSize:20,margin:10,fontWeight:'bold',textDecorationLine:'underline'}}
 
     
       
+      { showUp && <ModalPoup visible={showUp} >
+        <View style={{alignItems: 'center'}}>
+          <View style={styles.header}>
+           <Icon4  name='close'size={25} onPress={()=>setShowUpload(false)}/>
+          </View>
+        </View>
+      
+
+        <View style={{flexDirection:'column'}}>
+ 
+
+             <Button mode='contained'
+             onPress={handleupload}
+            
+            style={{margin:20}}> upload File</Button>
+
+
+           </View>
+          
        
+          
+
+
+
+
+          
+        
+      </ModalPoup>}
       
 
        

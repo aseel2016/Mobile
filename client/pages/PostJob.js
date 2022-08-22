@@ -100,6 +100,7 @@ if(isMounted)
        manager:manager,
        Description:description,
        Keywords:keywords,
+       openDate:new Date(),
      }
      try {
        const res = await Axios.post("http://10.0.2.2:3001/addJob", job);

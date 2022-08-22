@@ -8,6 +8,7 @@ email:{
     unique: true,
 },
 password:String,
+lastEvaluation:Date,
 age:Number,
 BankAccount:String,
 gender:String,

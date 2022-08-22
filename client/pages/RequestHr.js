@@ -1,7 +1,7 @@
 import React,{useState,useEffect,useRef} from 'react';
 import 'react-native-gesture-handler';
 
-import { StyleSheet, Text,TouchableOpacity, View,ScrollView,Alert,Dimensions} from 'react-native';
+import { StyleSheet, Linking,Text,TouchableOpacity, View,ScrollView,Alert,Dimensions} from 'react-native';
 import {Calendar, CalendarList} from 'react-native-calendars';
 import HomeHeader from '../components/HomeHeader';
 import {Agenda, DateData, AgendaEntry, AgendaSchedule} from 'react-native-calendars';
@@ -16,19 +16,22 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors } from '../global/styles';
 import { Card,Avatar,IconButton } from 'react-native-paper';
 import { Modal, Portal,Snackbar ,TextInput,Checkbox  ,  Button, Provider } from 'react-native-paper';
-import { v4 as uuidv4 } from 'uuid';
-import "react-native-get-random-values";
+
 
  // required as a polyfill for uuid. See info here: https://github.com/uuidjs/uuid#getrandomvalues-not-supported
 
   import 'firebase/firestore';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-
+import { v4 as uuidv4 } from 'uuid';
+import "react-native-get-random-values";
 import Firebase from '../Firebase';
 import { onSnapshot, collection, doc, updateDoc,setDoc,getFirestore,deleteDoc} from "firebase/firestore";
 import db from "../Firebase";
 import  { preciseDiff } from 'moment';
 import {Picker} from '@react-native-picker/picker';
+import { storage } from "../Firebase";
+import {ref,uploadBytes,listAll,getDownloadURL} from 'firebase/storage';
+
 let requestOffEm=[];
 let idEm;
 let first;
@@ -49,7 +52,7 @@ let Mefirst;
 let Melast;
 let Meid;
 let accessible;
-
+let flaggg=false;
 let hrstate="Waiting";
 let managerstate="Waiting";
 
@@ -67,7 +70,39 @@ export default function RequestHR({route,navigation}){
 
  const [dateend, setDateend] = useState(moment());
  const [flag, setFlag] = useState(false);
+const[urls,setUrls]=useState([]);
+useEffect(()=>{
+      
+  setUrls([])
+  const fileList=ref(storage,'allFiles/');
+  listAll(fileList).then((response)=>{
+    response.items.forEach((item)=>{     
+      getDownloadURL(item).then((url)=>
+  {
+      
+ 
+  setUrls((urls) => [
+      ...urls,
+      {"name":item.name,"url":url},
+    ]);
+  }
+      )
+  
+  
+  })})
+  
 
+
+},[])
+
+console.log(urls)
+  
+urls.map((val)=>{
+  const u=val.name.split(" ");
+if(u[2]===reqId){
+  flaggg=true  }
+}
+)
  resultFinal=[];
 
    const[totalDays,setTotaldays]=useState([]);
@@ -269,7 +304,7 @@ const datay =  await response.json()
             const now=moment();
             const ss=moment(s);
             const ee=moment(e);
-            r=moment.preciseDiff(ss,ee,true);
+            const r=moment.preciseDiff(ss,ee,true);
             if(valueEm.state==='month'){
               if((now.month()==ss.month()) &&   (now.year()==ss.year()) ){
            
@@ -627,8 +662,38 @@ return (
         onConfirm={handleConfirm2}
         onCancel={hideDatePicker2}
       />
+<View>
+  {flaggg?
+  <View>
+  <Text style={{margin:10,
+    fontSize:18,fontWeight:'bold'}}>Attached Files:</Text>
+    {   
+        urls.map((val)=>{
+          const u=val.name.split(" ");
+        if(u[2]===reqId)
 
- 
+        {
+        return  (
+          
+          <View key={uuidv4()}>
+  <Text style={{fontSize:20,fontWeight:'900'}}
+                onPress={() => Linking.openURL(val.url)}>
+          📄 {u[0]}
+          </Text>
+  </View>
+  
+  );
+        }
+       
+        }
+        )
+        }
+  </View>
+  :
+  <View>
+    
+  </View>}
+</View>
 <View style={{flexDirection:"row"}}>
 
 <Button  mode="contained" onPress={handleaccept} style={{marginVertical:40,marginHorizontal:50,padding:10,backgroundColor:'green'}} >

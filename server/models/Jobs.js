@@ -10,14 +10,14 @@ manager:{
 Description:{
     type:String,
 },
-state:{
-    type:String,
-},
-openDate:{
-type:Date,
-},
 Keywords:{
     type:[String],
+},
+openDate:{
+    type:Date,
+},
+state:{
+    type:String,
 },
 Applicants:{
 type:[

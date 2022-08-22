@@ -605,6 +605,9 @@ app.post("/getRequestID",async(req,res)=>{
         start:user.Starting,
         end:user.Ending,
         idd:user.emplyeeId,
+        deliver:user.Deliver,
+        flag:user.Flag,
+        manager:user.StatusManager,
         
         });
     }
@@ -1871,14 +1874,46 @@ app.post('/update_applicant', async (req, res) => {
 )
 
 
+app.post('/updateEvaluation', async (req, res) => {
+  console.log(req.body);
+  const id=req.body.id;
+  const d=req.body.date;
+
+
+  Employee.findOneAndUpdate(
+    {"_id":id   }, 
+    
+    {   
+        $set:{lastEvaluation:d}
+    },
+    {
+        returnNewDocument: true
+    }
+  , function( error, result){
+   if(error)
+  {
+    res.json({user:false});
+  }
+   else{
+    res.json({user:true});
+   }
+  });
+ 
+
+	
+}
+
+
+)
+
 app.post('/update_applicantAll', async (req, res) => {
   console.log(req.body);
   const id=req.body.job;
 
   Job.findOneAndUpdate(
-    {"_id":id  }, 
-
-    { 
+    {"_id":id   }, 
+    
+    {   
         $set: { "Applicants.$[].status" :"Rejected" }
     },
     {

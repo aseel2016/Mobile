@@ -5,6 +5,7 @@ import Login from '../pages/login/Login'
 import RootClient from './ClientTabs'
 import DawNav from './DrawerNavigate'
 import Notifications from '../pages/notifications'
+import UploadFile from '../pages/UploadFile';
 import React from 'react';
 import { colors } from '../global/styles';
  import EditProfile from '../pages/EditProfile';
@@ -78,7 +79,11 @@ export default function NavigateScreens() {
   
 }}
 />
-
+<Stack.Screen  name="UploadFile" component={UploadFile}
+ options={{title:"Upload File"
+  
+}}
+/>
 <Stack.Screen  name="AllOutTheoffice" component={AllOutTheoffice}
  options={{title:"out the office"
   
